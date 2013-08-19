@@ -5,6 +5,49 @@ ScalarmExperimentManager::Application.routes.draw do
   # You can have the root of your site routed with "root"
   # root 'welcome#index'
 
+  resources :experiments do
+    collection do
+      #post :start_experiment
+      #post :calculate_experiment_size
+    end
+
+    member do
+      #get   :code_base
+      #get   :next_simulation
+      #get   :parameter_values
+      #get   :file_with_configurations
+      #get   :monitor
+      #post  :stop
+      #post  :destroy
+      #post  :extend_input_values
+      #get   :intermediate_results
+      #get   :get_booster_dialog
+      #get   :extension_dialog
+      #post  :change_scheduling_policy
+
+      # experiment charts
+      #post :histogram
+      #post :scatter_plot
+      #post :regression_tree
+      # monitoring stats
+      #get :experiment_stats
+      #get :experiment_moes
+      #get :running_simulations_table
+      #get :completed_simulations_table
+      #get :experiment_results_table
+
+      # Progress monitoring API
+      get :completed_simulations_count
+    end
+
+    #resources :simulations do
+    #  member do
+    #    post :mark_as_complete
+    #    post :progress_info
+    #  end
+    #end
+  end
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
