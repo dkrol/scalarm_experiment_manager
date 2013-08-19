@@ -5,7 +5,7 @@ class MongoActiveRecord
   include Mongo
   # static initialization
   # initialize connection to mongodb
-  @@db = @@grid = nil
+  #@@db = @@grid = nil
 
   def self.connection_init(storage_manager_url, db_name)
     begin
@@ -79,9 +79,13 @@ class MongoActiveRecord
   end
 
   def to_s
-    <<-eos
+    if self.nil?
+      'Nil'
+    else
+      <<-eos
       MongoActiveRecord - #{self.class.name} - Attributes - #{@attributes}\n
-    eos
+      eos
+    end
   end
 
   #### Class Methods ####
@@ -131,7 +135,25 @@ class MongoActiveRecord
     collection.remove(selector)
   end
 
-  private
+  def self.find_by_query(query)
+    collection = Object.const_get(name).send(:collection)
+
+    attributes = collection.find_one(query)
+
+    if attributes.nil?
+      nil
+    else
+      Object.const_get(name).new(attributes)
+    end
+  end
+
+  def self.find_all_by_query(query)
+    collection = Object.const_get(name).send(:collection)
+
+    collection.find(query).map do |attributes|
+      Object.const_get(name).new(attributes)
+    end
+  end
 
   def self.find_by(parameter, value)
     value = value.first if value.is_a? Enumerable
