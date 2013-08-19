@@ -119,25 +119,32 @@ class DataFarmingExperiment < MongoActiveRecord
   #  parameters
   #end
   #
-  #def input_parameter_label_for(uid)
-  #  entity_group_id, entity_id, parameter_id = uid.split(ID_DELIM)
-  #
-  #  self.experiment_input.each do |entity_group|
-  #    if entity_group['id'] == entity_group_id
-  #      entity_group['entities'].each do |entity|
-  #        if entity['id'] == entity_id
-  #          entity['parameters'].each do |parameter|
-  #            if parameter['id'] == parameter_id
-  #              return "#{entity_group['label']} - #{entity['label']} - #{parameter['label']}"
-  #            end
-  #          end
-  #        end
-  #      end
-  #    end
-  #  end
-  #
-  #  nil
-  #end
+  def input_parameter_label_for(uid)
+    entity_group_id, entity_id, parameter_id = uid.split(ID_DELIM)
+
+    self.experiment_input.each do |entity_group|
+      if entity_group['id'] == entity_group_id
+        entity_group['entities'].each do |entity|
+          if entity['id'] == entity_id
+            entity['parameters'].each do |parameter|
+              if parameter['id'] == parameter_id
+                return "#{entity_group['label']} - #{entity['label']} - #{parameter['label']}"
+              end
+            end
+          end
+        end
+      end
+    end
+
+    nil
+  end
+
+  def self.output_parameter_label_for(moe_name)
+    label = moe_name.split(/([[:upper:]][[:lower:]]+)/).delete_if(&:empty?).join(" ")
+
+    label.split(' ').map{|x| x[0].capitalize + x[1..-1]}.join(' ').gsub('_', ' ')
+  end
+
   #
   #def value_list(debug = false)
   #  if self.cached_value_list.nil?
