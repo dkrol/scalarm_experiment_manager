@@ -5,6 +5,10 @@ ScalarmExperimentManager::Application.routes.draw do
   # You can have the root of your site routed with "root"
   # root 'welcome#index'
 
+  get 'login' => 'user_controller#login'
+  post 'login' => 'user_controller#login'
+  post 'user_controller/logout'
+
   resources :experiments do
     collection do
       #post :start_experiment
