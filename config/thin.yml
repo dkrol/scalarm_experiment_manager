@@ -1,0 +1,6 @@
+pid: tmp/pids/thin.pid
+log: log/thin.log
+environment: production
+servers: 6
+#socket: /tmp/scalarm_experiment_manager.sock
+#port: 11300
