@@ -47,13 +47,13 @@ class DataFarmingExperiment < MongoActiveRecord
   #end
   #
   #
-  #def get_statistics
-  #  all  = ExperimentInstance.count_with_query(self.experiment_id)
-  #  done = ExperimentInstance.count_with_query(self.experiment_id, {'is_done' => true})
-  #  sent = ExperimentInstance.count_with_query(self.experiment_id, {'to_sent' => false, 'is_done' => false})
-  #
-  #  return all, done, sent
-  #end
+  def get_statistics
+    all  = simulations_count_with({})
+    done = simulations_count_with({'is_done' => true})
+    sent = simulations_count_with({'to_sent' => false, 'is_done' => false})
+
+    return all, done, sent
+  end
   #
   #def argument_names
   #  parameters.flatten.join(',')

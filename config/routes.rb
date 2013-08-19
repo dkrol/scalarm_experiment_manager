@@ -30,7 +30,7 @@ ScalarmExperimentManager::Application.routes.draw do
       #post :scatter_plot
       #post :regression_tree
       # monitoring stats
-      #get :experiment_stats
+
       #get :experiment_moes
       #get :running_simulations_table
       #get :completed_simulations_table
@@ -38,6 +38,7 @@ ScalarmExperimentManager::Application.routes.draw do
 
       # Progress monitoring API
       get :completed_simulations_count
+      get :experiment_stats
     end
 
     #resources :simulations do
