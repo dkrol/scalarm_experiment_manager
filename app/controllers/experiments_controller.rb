@@ -19,9 +19,9 @@ class ExperimentsController < ApplicationController
 
     stats = {
       all: @experiment.experiment_size, sent: instances_sent, done_num: instances_done,
-      done_percentage: "'%.2f'" % ((instances_done.to_f / experiment.experiment_size) * 100),
-      generated: [generated, experiment.experiment_size].min,
-      progress_bar: "[#{experiment.progress_bar_color.join(',')}]"
+      done_percentage: "'%.2f'" % ((instances_done.to_f / @experiment.experiment_size) * 100),
+      generated: [generated, @experiment.experiment_size].min,
+      progress_bar: "[#{@experiment.progress_bar_color.join(',')}]"
     }
 
     # TODO - mean execution time and predicted time to finish the experiment
