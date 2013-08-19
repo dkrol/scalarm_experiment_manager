@@ -5,7 +5,7 @@ module DataFarmingExperimentProgressBar
 
   def progress_bar_table
       table_name = "experiment_progress_bar_#{self.experiment_id}"
-      ExperimentInstanceDb.default_instance.default_connection.collection(table_name)
+      MongoActiveRecord.get_collection(table_name)
   end
 
   def parts_per_progress_bar_slot
@@ -91,7 +91,7 @@ module DataFarmingExperimentProgressBar
 
     #Rails.logger.debug("Query hash => #{query_hash} --- Option hash => #{option_hash}")
     new_bar_state = 0
-    ExperimentInstance.raw_find_by_query(experiment_id, query_hash, option_hash).each do |instance_doc|
+    self.find_simulation_docs_by(query_hash, option_hash).each do |instance_doc|
       #Rails.logger.debug("Instance_doc --- #{instance_doc}")
       if instance_doc['is_done']
         new_bar_state += 2

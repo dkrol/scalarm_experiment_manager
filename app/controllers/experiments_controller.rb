@@ -11,16 +11,17 @@ class ExperimentsController < ApplicationController
   end
 
   def experiment_stats
-    generated, sent, done_num = @experiment.get_statistics
-    if generated > @experiment.experiment_size
+    sims_generated, sims_sent, sims_done = @experiment.get_statistics
+
+    if sims_generated > @experiment.experiment_size
       @experiment.experiment_size = generated
       @experiment.save
     end
 
     stats = {
-      all: @experiment.experiment_size, sent: instances_sent, done_num: instances_done,
-      done_percentage: "'%.2f'" % ((instances_done.to_f / @experiment.experiment_size) * 100),
-      generated: [generated, @experiment.experiment_size].min,
+      all: @experiment.experiment_size, sent: sims_sent, done_num: sims_done,
+      done_percentage: "'%.2f'" % ((sims_done.to_f / @experiment.experiment_size) * 100),
+      generated: [sims_generated, @experiment.experiment_size].min,
       progress_bar: "[#{@experiment.progress_bar_color.join(',')}]"
     }
 

@@ -41,12 +41,12 @@ class DataFarmingExperiment < MongoActiveRecord
   #  Simulation.find_by_id self.simulation_id
   #end
   #
-  #def save_and_cache
+  def save_and_cache
   #  #Rails.cache.write("data_farming_experiment_#{self._id}", self, :expires_in => 600.seconds)
-  #  self.save
-  #end
-  #
-  #
+    self.save
+  end
+
+
   def get_statistics
     all  = simulations_count_with({})
     done = simulations_count_with({'is_done' => true})
@@ -194,15 +194,15 @@ class DataFarmingExperiment < MongoActiveRecord
   #  end
   #end
   #
-  #def experiment_size(debug = false)
-  #  if self.size.nil?
-  #    self.size = self.value_list.reduce(1){|acc, x| acc * x.size}
-  #    self.save_and_cache unless debug
-  #  end
-  #
-  #  self.size
-  #end
-  #
+  def experiment_size(debug = false)
+    if self.size.nil?
+      self.size = self.value_list.reduce(1){|acc, x| acc * x.size}
+      self.save_and_cache unless debug
+    end
+
+    self.size
+  end
+
   #def create_result_csv_for(moe_name)
   #
   #  CSV.generate do |csv|
