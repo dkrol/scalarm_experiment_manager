@@ -13,7 +13,7 @@
   	<!-- Set the viewport width to device width for mobile -->
   	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  	<title><%= content_for?(:title) ? yield(:title) : "Untitled" %></title>
+  	<title><%= content_for?(:title) ? yield(:title) : 'Scalarm' %></title>
 
     <%= stylesheet_link_tag 'https://fonts.googleapis.com/css?family=Ubuntu' %>
   	<%= stylesheet_link_tag    "application" %>
@@ -37,17 +37,23 @@
       <div class="notice" style="display: none;">
         <%= flash[:notice] if flash[:notice] %>
       </div>
-      <%= javascript_tag("$('.notice').show();") if flash[:notice]  %>
+      <% content_for :javascript do %>
+        <%= javascript_tag("$('.notice').show();") if flash[:notice]  %>
+      <% end %>
 
       <div class="error" style="display: none;">
         <%= flash[:error] if flash[:error] %>
       </div>
-      <%= javascript_tag("$('.error').show();") if flash[:error]  %>
+      <% content_for :javascript do %>
+        <%= javascript_tag("$('.error').show();") if flash[:error]  %>
+      <% end %>
+
 
       <%= yield %>
     </div>
 
-    
     <%= javascript_include_tag "application" %>
+
+    <%= yield :javascript %>
   </body>
 </html>

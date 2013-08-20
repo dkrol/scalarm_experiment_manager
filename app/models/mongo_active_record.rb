@@ -1,23 +1,9 @@
 require 'bson'
 require 'mongo'
+require 'json'
 
 class MongoActiveRecord
   include Mongo
-  # static initialization
-  # initialize connection to mongodb
-  #@@db = @@grid = nil
-
-  def self.connection_init(storage_manager_url, db_name)
-    begin
-      @@client = MongoClient.new(storage_manager_url.split(':')[0], storage_manager_url.split(':')[1])
-      @@db = @@client[db_name]
-      @@grid = Mongo::Grid.new(@@db)
-    rescue Exception => e
-      puts "Could not initialize connection with MongoDB --- #{e}"
-    end
-    
-    Rails.logger.debug("MongoActiveRecord initialized with URL '#{storage_manager_url}' and DB '#{db_name}'")
-  end
 
   def self.execute_raw_command_on(db, cmd)
     @@db.connection.db(db).command(cmd)
@@ -189,5 +175,26 @@ class MongoActiveRecord
     end
 
   end
+
+  # INITIALIZATION STUFF
+
+  def self.connection_init(storage_manager_url, db_name)
+    begin
+      @@client = MongoClient.new(storage_manager_url.split(':')[0], storage_manager_url.split(':')[1])
+      @@db = @@client[db_name]
+      @@grid = Mongo::Grid.new(@@db)
+    rescue Exception => e
+      puts "Could not initialize connection with MongoDB --- #{e}"
+    end
+
+    Rails.logger.debug("MongoActiveRecord initialized with URL '#{storage_manager_url}' and DB '#{db_name}'")
+  end
+
+  # class initizalization
+  config = YAML.load_file(File.join(Rails.root, 'config', 'scalarm.yml'))
+  information_service = InformationService.new(config['information_service_url'], config['information_service_user'], config['information_service_pass'])
+  storage_manager_list = JSON.parse(information_service.get_list_of('db_routers'))
+
+  MongoActiveRecord.connection_init(storage_manager_list.sample, config['db_name'])
 
 end

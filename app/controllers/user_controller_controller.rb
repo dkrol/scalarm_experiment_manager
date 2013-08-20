@@ -1,5 +1,6 @@
 class UserControllerController < ApplicationController
   def login
+    Rails.logger.debug("Flash #{flash[:error]}")
     if request.post?
       begin
         session[:user] = ScalarmUser.authenticate_with_password(params[:username], params[:password]).id
@@ -9,6 +10,7 @@ class UserControllerController < ApplicationController
 
         redirect_to experiments_path
       rescue Exception => e
+        Rails.logger.debug("Exception: #{e}")
         flash[:error] = e.to_s
         session[:user] = nil
 

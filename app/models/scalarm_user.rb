@@ -10,19 +10,19 @@ class ScalarmUser < MongoActiveRecord
   end
 
   def get_running_experiments
-    #DataFarmingExperiment.find_all_by_user_id(self.id).select do |experiment|
-    #  experiment.is_running
-    #end
+    DataFarmingExperiment.find_all_by_user_id(self.id).select do |experiment|
+      experiment.is_running
+    end
   end
 
   def get_historical_experiments
-    #DataFarmingExperiment.find_all_by_user_id(self.id).select do |experiment|
-    #  experiment.is_running == false
-    #end
+    DataFarmingExperiment.find_all_by_user_id(self.id).select do |experiment|
+      experiment.is_running == false
+    end
   end
 
   def get_simulation_scenarios
-    #Simulation.find_all_by_user_id(self.id)
+    Simulation.find_all_by_user_id(self.id)
   end
 
   def password=(pass)

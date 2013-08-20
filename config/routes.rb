@@ -7,7 +7,18 @@ ScalarmExperimentManager::Application.routes.draw do
 
   get 'login' => 'user_controller#login'
   post 'login' => 'user_controller#login'
-  post 'user_controller/logout'
+  post 'logout' => 'user_controller#logout'
+  get 'user_controller/account'
+  post 'user_controller/change_password'
+
+  get 'simulations' => 'simulations#index'
+  get 'simulations/index'
+  get 'simulations/registration'
+  post 'simulations/upload_component'
+  post 'simulations/destroy_component'
+  post 'simulations/upload_simulation'
+  post 'simulations/destroy_simulation'
+  post 'simulations/conduct_experiment'
 
   resources :experiments do
     collection do
@@ -20,7 +31,7 @@ ScalarmExperimentManager::Application.routes.draw do
       #get   :next_simulation
       #get   :parameter_values
       #get   :file_with_configurations
-      #get   :monitor
+
       #post  :stop
       #post  :destroy
       #post  :extend_input_values

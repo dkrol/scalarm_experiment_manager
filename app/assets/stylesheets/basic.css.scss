@@ -32,28 +32,26 @@ select {
 /* layout */
 
 #wrapper {
-    position: relative;
-    width: 960px;
-    background: image-url("bg03.jpg") repeat;
-    /* curved border radius */
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    padding: 10px;
-    margin: 10px auto;
-    min-height: 535px;
-    padding-bottom: 2px;
+  position: relative;
+  width: 960px;
+  background: image-url("bg03.jpg") repeat;
+  margin: 5px auto;
+  min-height: 535px;
+  padding: 10px;
+  /* curved border radius */
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
 }
 
 header {
-    margin-bottom: 10px;
-    padding: 5px;
-    background-color: #eee;
-    height: 80px;
-    /* curved border radius */
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 17px;
+  background-color: #eee;
+  /* curved border radius */
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
 }
 
 .navigation {
