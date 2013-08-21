@@ -1,6 +1,6 @@
 class ExperimentsController < ApplicationController
 
-  before_filter :load_experiment, except: [ :index ]
+  before_filter :load_experiment, except: [:index]
 
   def index
     @running_experiments = @current_user.get_running_experiments.sort { |e1, e2| e2.start_at <=> e1.start_at }
@@ -9,7 +9,73 @@ class ExperimentsController < ApplicationController
   end
 
   def show
+    config = YAML.load_file(File.join(Rails.root, 'config', 'scalarm.yml'))
+    information_service = InformationService.new(config['information_service_url'], config['information_service_user'], config['information_service_pass'])
 
+    @storage_manager_url = information_service.get_list_of('storage').sample
+
+    @error_flag = false
+
+    begin
+      if Time.now - @experiment.start_at > 30
+        Thread.new do
+          Rails.logger.debug("Updating all progress bars --- #{Time.now - @experiment.start_at}")
+          @experiment.update_all_bars
+        end
+      end
+
+    rescue Exception => e
+      flash[:error] = "Problem occured during loading experiment info - #{e}"
+      @error_flag = true
+      #@experiment.destroy
+      #flash[:notice] = 'Your experiment has been destroyed.'
+      redirect_to action: :index
+    end
+
+    unless @error_flag
+      @running_experiments = @current_user.get_running_experiments.sort { |e1, e2| e2.start_at <=> e1.start_at }
+      @historical_experiments = @current_user.get_historical_experiments.sort { |e1, e2| e2.end_at <=> e1.end_at }
+      @simulation_scenarios = @current_user.get_simulation_scenarios.sort { |s1, s2| s2.created_at <=> s1.created_at }
+
+      @simulation_managers = {}
+      #TODO - uncomment when ready
+      #InfrastructureFacade.get_registered_infrastructures.each do |infrastructure_id, infrastructure_info|
+      #  @simulation_managers[infrastructure_id] = infrastructure_info[:facade].get_running_simulation_managers(current_user)
+      #end
+    end
+
+  end
+
+  def get_booster_dialog
+    @simulation_managers, @current_states = {}, {}
+    #TODO - uncomment when ready
+    #InfrastructureFacade.get_registered_infrastructures.each do |infrastructure_id, infrastructure_info|
+    #  @simulation_managers[infrastructure_id] = infrastructure_info[:facade].get_running_simulation_managers(current_user)
+    #  @current_states[infrastructure_id] = infrastructure_info[:facade].current_state(current_user)
+    #end
+
+    render inline: render_to_string(partial: 'booster_dialog', locals: { user: current_user })
+  end
+
+  # stops the currently running DF experiment (if any)
+  def stop
+    @experiment.is_running = false
+    @experiment.end_at = Time.now
+
+    @experiment.save_and_cache
+
+    redirect_to action: :index
+  end
+
+  def file_with_configurations
+    file_path = "/tmp/configurations_#{@experiment.id}.txt"
+    File.delete(file_path) if File.exist?(file_path)
+
+    File.open(file_path, 'w') do |file|
+      file.puts(@experiment.create_result_csv)
+    end
+
+    send_file(file_path, type: 'text/plain')
   end
 
   def start_experiment
@@ -39,19 +105,8 @@ class ExperimentsController < ApplicationController
       end
     end
 
-    # create the old fashion experiment object
-    #@experiment = Experiment.new(:is_running => true,
-    #                             :instance_index => 0,
-    #                             :run_counter => 1,
-    #                             :time_constraint_in_sec => 60,
-    #                             :time_constraint_in_iter => 100,
-    #                             :experiment_name => @simulation.name,
-    #                             :parametrization => @scenario_parametrization.map { |k, v| "#{k}=#{v}" }.join(','))
-
-    #@experiment.save_and_cache
     # create the new type of experiment object
-    data_farming_experiment = DataFarmingExperiment.new({#'experiment_id' => @experiment.id,
-                                                         'simulation_id' => @simulation.id,
+    data_farming_experiment = DataFarmingExperiment.new({'simulation_id' => @simulation.id,
                                                          'experiment_input' => @experiment_input,
                                                          'name' => @simulation.name,
                                                          'is_running' => true,
@@ -62,40 +117,26 @@ class ExperimentsController < ApplicationController
                                                          'user_id' => @current_user.id,
                                                          'scheduling_policy' => 'monte_carlo'
                                                         })
+
     data_farming_experiment.user_id = @current_user.id unless @current_user.nil?
     data_farming_experiment.labels = data_farming_experiment.parameters.flatten.join(',')
-
     data_farming_experiment.save
     data_farming_experiment.experiment_id = data_farming_experiment.id
     data_farming_experiment.save
-    # rewrite all necessary parameters
-    #@experiment.parameters = data_farming_experiment.parametrization_values
-    #@experiment.arguments = data_farming_experiment.parametrization_values
-    #@experiment.doe_groups = ''
-    #@experiment.experiment_size = data_farming_experiment.experiment_size
-    #@experiment.is_running = true
-    #@experiment.start_at = Time.now
     # create progress bar
     data_farming_experiment.insert_initial_bar
     data_farming_experiment.create_simulation_table
-    # DEPRECATED
-    # create multiple list to fast generete subsequent simulations
-    #labels = data_farming_experiment.parameters
-    #value_list = data_farming_experiment.value_list
-    #multiply_list = data_farming_experiment.multiply_list
-    #ExperimentInstanceDb.default_instance.store_experiment_info(@experiment, labels, value_list, multiply_list)
-    #@experiment.save_and_cache
 
-    if params.include?(:computing_power) and (not params[:computing_power].empty?)
-      computing_power = JSON.parse(params[:computing_power])
-      InfrastructureFacade.schedule_simulation_managers(@current_user, data_farming_experiment.id, computing_power['type'], computing_power['resource_counter'])
-    end
+    #TODO - uncomment when ready
+    #if params.include?(:computing_power) and (not params[:computing_power].empty?)
+    #  computing_power = JSON.parse(params[:computing_power])
+    #  InfrastructureFacade.schedule_simulation_managers(@current_user, data_farming_experiment.id, computing_power['type'], computing_power['resource_counter'])
+    #end
 
     respond_to do |format|
       format.html { redirect_to experiment_path(data_farming_experiment.id) }
       format.json { render :json => {status: 'ok', experiment_id: data_farming_experiment.id} }
     end
-
   end
 
   def calculate_experiment_size
@@ -123,7 +164,7 @@ class ExperimentsController < ApplicationController
     experiment_size = data_farming_experiment.value_list.reduce(1) { |acc, x| acc * x.size }
     Rails.logger.debug("Experiment size is #{experiment_size}")
 
-    render :json => { experiment_size: experiment_size }
+    render :json => {experiment_size: experiment_size}
   end
 
   ### Progress monitoring API
@@ -131,7 +172,7 @@ class ExperimentsController < ApplicationController
   def completed_simulations_count
     simulation_counter = @experiment.completed_simulations_count_for(params[:secs].to_i)
 
-    render json: { count: simulation_counter }
+    render json: {count: simulation_counter}
   end
 
   def experiment_stats
@@ -205,10 +246,12 @@ class ExperimentsController < ApplicationController
   def load_experiment
     #Rails.logger.debug("Loading experiment --- #{params.include?('id')} --- #{@current_user.nil?}")
     if params.include?('id') and not @current_user.nil?
-      @experiment = DataFarmingExperiment.find_by_query({ 'user_id' => @current_user.id, '_id' => BSON::ObjectId(params['id']) })
-      #Rails.logger.debug("Experiment: #{@experiment}")
+      @experiment = DataFarmingExperiment.find_by_query({'user_id' => @current_user.id, '_id' => BSON::ObjectId(params['id'])})
+
       if @experiment.nil?
-        raise "Experiment '#{params['id']}' for user '#{@current_user.login}' not found"
+        flash[:error] = "Experiment '#{params['id']}' for user '#{@current_user.login}' not found"
+
+        redirect action: :index
       end
     end
   end

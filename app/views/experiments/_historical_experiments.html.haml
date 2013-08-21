@@ -1,5 +1,5 @@
-.panel.radius.list
-  = content_tag :h4, t('historical_experiments.label'), class: 'subheader'
+%section.panel.radius.list
+  = content_tag :h3, t('historical_experiments.label'), class: 'subheader'
 
   - if @historical_experiments.blank?
     %p No historical experiment available

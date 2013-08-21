@@ -55,6 +55,12 @@ en:
     label: "Registered simulation progress monitors"
     empty_list: There is no simulation progress monitor defined to run. Go to registration form and define new ones.
 
+  experiments:
+    show:
+      stats_header: Simulation statistics
+      progress_bar_header: Experiment progress bar
+      actions_header: Actions
+
   simulations:
     deregister_button: Deregister
     go_to_registriation: Go to registration form

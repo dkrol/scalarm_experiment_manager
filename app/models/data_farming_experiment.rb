@@ -37,10 +37,10 @@ class DataFarmingExperiment < MongoActiveRecord
   #  simulations_count_with({}) == simulations_count_with({'is_done' => true})
   #end
   #
-  #def simulation
-  #  Simulation.find_by_id self.simulation_id
-  #end
-  #
+  def simulation
+    Simulation.find_by_id self.simulation_id
+  end
+
   def save_and_cache
   #  #Rails.cache.write("data_farming_experiment_#{self._id}", self, :expires_in => 600.seconds)
     self.save
@@ -210,20 +210,20 @@ class DataFarmingExperiment < MongoActiveRecord
     self.size
   end
 
-  #def create_result_csv_for(moe_name)
-  #
-  #  CSV.generate do |csv|
-  #    csv << self.parameters.flatten + [ moe_name ]
-  #
-  #    ExperimentInstance.raw_find_by_query(self.experiment_id, { is_done: true }, { fields: %w(values result) }).each do |simulation_doc|
-  #      next if not simulation_doc['result'].has_key?(moe_name)
-  #
-  #      values = simulation_doc['values'].split(',').map{|x| '%.4f' % x.to_f}
-  #      csv << values + [ simulation_doc['result'][moe_name] ]
-  #    end
-  #  end
-  #
-  #end
+  def create_result_csv_for(moe_name)
+
+    CSV.generate do |csv|
+      csv << self.parameters.flatten + [ moe_name ]
+
+      self.find_simulation_docs_by({ is_done: true }, { fields: %w(values result) }).each do |simulation_doc|
+        next if not simulation_doc['result'].has_key?(moe_name)
+
+        values = simulation_doc['values'].split(',').map{|x| '%.4f' % x.to_f}
+        csv << values + [ simulation_doc['result'][moe_name] ]
+      end
+    end
+
+  end
   #
   #def moe_names
   #  moe_name_set = []

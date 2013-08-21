@@ -1,5 +1,6 @@
 require 'openssl'
 require 'net/https'
+require 'json'
 
 class InformationService
 
@@ -41,7 +42,7 @@ class InformationService
       response = Net::HTTP.start(@host, @port, ssl_options) { |http| http.request(req) }
       puts "#{Time.now} --- response from Information Service is #{response.body}"
 
-      return response.body
+      return JSON.parse(response.body)
     rescue Exception => e
       puts "Exception occurred but nothing terrible :) - #{e.message}"
     end

@@ -30,13 +30,13 @@ ScalarmExperimentManager::Application.routes.draw do
       #get   :code_base
       #get   :next_simulation
       #get   :parameter_values
-      #get   :file_with_configurations
+      get   :file_with_configurations
 
-      #post  :stop
+      post  :stop
       #post  :destroy
       #post  :extend_input_values
       #get   :intermediate_results
-      #get   :get_booster_dialog
+      get   :get_booster_dialog
       #get   :extension_dialog
       #post  :change_scheduling_policy
 
