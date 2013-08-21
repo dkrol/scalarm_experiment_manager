@@ -12,6 +12,120 @@ class ExperimentsController < ApplicationController
 
   end
 
+  def start_experiment
+    @simulation = if params['simulation_id']
+                    Simulation.find_by_id params['simulation_id']
+                  elsif params['simulation_name']
+                    Simulation.find_by_name params['simulation_name']
+                  else
+                    nil
+                  end
+
+    doe_info = if params.include?('doe')
+                 JSON.parse(params['doe']).delete_if { |doe_id, parameter_list| parameter_list.first.nil? }
+               else
+                 []
+               end
+
+    @experiment_input = DataFarmingExperiment.prepare_experiment_input(@simulation, JSON.parse(params['experiment_input']), doe_info)
+    # prepare scenario parametrization in the old fashion
+    @scenario_parametrization = {}
+    @experiment_input.each do |entity_group|
+      entity_group['entities'].each do |entity|
+        entity['parameters'].each do |parameter|
+          parameter_uid = DataFarmingExperiment.parameter_uid(entity_group, entity, parameter)
+          @scenario_parametrization[parameter_uid] = parameter['parametrizationType']
+        end
+      end
+    end
+
+    # create the old fashion experiment object
+    #@experiment = Experiment.new(:is_running => true,
+    #                             :instance_index => 0,
+    #                             :run_counter => 1,
+    #                             :time_constraint_in_sec => 60,
+    #                             :time_constraint_in_iter => 100,
+    #                             :experiment_name => @simulation.name,
+    #                             :parametrization => @scenario_parametrization.map { |k, v| "#{k}=#{v}" }.join(','))
+
+    #@experiment.save_and_cache
+    # create the new type of experiment object
+    data_farming_experiment = DataFarmingExperiment.new({#'experiment_id' => @experiment.id,
+                                                         'simulation_id' => @simulation.id,
+                                                         'experiment_input' => @experiment_input,
+                                                         'name' => @simulation.name,
+                                                         'is_running' => true,
+                                                         'run_counter' => 1,
+                                                         'time_constraint_in_sec' => 3600,
+                                                         'doe_info' => doe_info,
+                                                         'start_at' => Time.now,
+                                                         'user_id' => @current_user.id,
+                                                         'scheduling_policy' => 'monte_carlo'
+                                                        })
+    data_farming_experiment.user_id = @current_user.id unless @current_user.nil?
+    data_farming_experiment.labels = data_farming_experiment.parameters.flatten.join(',')
+
+    data_farming_experiment.save
+    data_farming_experiment.experiment_id = data_farming_experiment.id
+    data_farming_experiment.save
+    # rewrite all necessary parameters
+    #@experiment.parameters = data_farming_experiment.parametrization_values
+    #@experiment.arguments = data_farming_experiment.parametrization_values
+    #@experiment.doe_groups = ''
+    #@experiment.experiment_size = data_farming_experiment.experiment_size
+    #@experiment.is_running = true
+    #@experiment.start_at = Time.now
+    # create progress bar
+    data_farming_experiment.insert_initial_bar
+    data_farming_experiment.create_simulation_table
+    # DEPRECATED
+    # create multiple list to fast generete subsequent simulations
+    #labels = data_farming_experiment.parameters
+    #value_list = data_farming_experiment.value_list
+    #multiply_list = data_farming_experiment.multiply_list
+    #ExperimentInstanceDb.default_instance.store_experiment_info(@experiment, labels, value_list, multiply_list)
+    #@experiment.save_and_cache
+
+    if params.include?(:computing_power) and (not params[:computing_power].empty?)
+      computing_power = JSON.parse(params[:computing_power])
+      InfrastructureFacade.schedule_simulation_managers(@current_user, data_farming_experiment.id, computing_power['type'], computing_power['resource_counter'])
+    end
+
+    respond_to do |format|
+      format.html { redirect_to experiment_path(data_farming_experiment.id) }
+      format.json { render :json => {status: 'ok', experiment_id: data_farming_experiment.id} }
+    end
+
+  end
+
+  def calculate_experiment_size
+    @simulation = if params['simulation_id']
+                    Simulation.find_by_id params['simulation_id']
+                  elsif params['simulation_name']
+                    Simulation.find_by_name params['simulation_name']
+                  else
+                    nil
+                  end
+
+    doe_info = JSON.parse(params['doe']).delete_if { |doe_id, parameter_list| parameter_list.first.nil? }
+    @experiment_input = DataFarmingExperiment.prepare_experiment_input(@simulation, JSON.parse(params['experiment_input']), doe_info)
+
+    # create the new type of experiment object
+    data_farming_experiment = DataFarmingExperiment.new({'simulation_id' => @simulation.id,
+                                                         'experiment_input' => @experiment_input,
+                                                         'name' => @simulation.name,
+                                                         'is_running' => true,
+                                                         'run_counter' => 1,
+                                                         'time_constraint_in_sec' => 3600,
+                                                         'doe_info' => doe_info
+                                                        })
+
+    experiment_size = data_farming_experiment.value_list.reduce(1) { |acc, x| acc * x.size }
+    Rails.logger.debug("Experiment size is #{experiment_size}")
+
+    render :json => { experiment_size: experiment_size }
+  end
+
   ### Progress monitoring API
 
   def completed_simulations_count

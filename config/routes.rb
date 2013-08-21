@@ -22,8 +22,8 @@ ScalarmExperimentManager::Application.routes.draw do
 
   resources :experiments do
     collection do
-      #post :start_experiment
-      #post :calculate_experiment_size
+      post :start_experiment
+      post :calculate_experiment_size
     end
 
     member do

@@ -72,3 +72,26 @@ en:
       upload: Upload
       component_name: Component name
       component_code: Component code
+
+    conduct_experiment:
+      overview_header: Simulation information
+      overview_name: "Name: %{name}"
+      overview_description: "Description: %{description}"
+
+      input_header: Parameter space specification
+      input_parametrization_types: Parametrization
+      input_parameter_values: Parameter values
+      input_doe: Design of Experiment
+
+      submit_button: Start experiment
+      experiment_size_button: Calculate experiment size
+      experiment_size_dialog_body: "Calculated experiment size - <span id=\"calculated-experiment-size\"></span> simulations"
+
+      parametrization_tab:
+        header: Here you can specify type of parametrization for each input parameter
+        entity_group_header: "Entities of group '%{label}'"
+        entity_header: "Entity '%{label}'"
+        parameter_header: "Set '%{label}' to:"
+
+      parameters_values_tab:
+        header: Here you can specify values for each input parameter you want to explore

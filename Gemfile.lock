@@ -98,6 +98,7 @@ GEM
     rdoc (3.12.2)
       json (~> 1.4)
     ref (1.0.5)
+    rinruby (2.0.3)
     rvm-capistrano (1.4.3)
       capistrano (>= 2.15.4)
     sass (3.2.10)
@@ -154,6 +155,7 @@ DEPENDENCIES
   jquery-rails
   mongo
   rails (= 4.0.0)
+  rinruby
   rvm-capistrano
   sass-rails (~> 4.0.0)
   sdoc

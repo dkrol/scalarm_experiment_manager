@@ -1,29 +1,29 @@
 .content{'data-slug' => 'parametrization_types', style: ''}
-  %h3.subheader
-    Here you can specify type of parametrization for each input parameter
+  %h3.subheader= t('simulations.conduct_experiment.parametrization_tab.header')
+
   .accordion-container
     - parameter_id = 0
     - @simulation_input.each do |entity_group|
-      = content_tag :h3, "Entities of group '#{entity_group['label']}'"
-      %div
-        .accordion-container
-          - entity_group['entities'].each do |entity|
-            = content_tag :h3, "Entity '#{entity['label']}'"
-            %div
-              - entity['parameters'].each do |parameter|
-                - parameter_id += 1
-                = form_tag '', class: 'custom' do
-                  = content_tag :div, :class => "row #{(parameter.include?('value') ? 'hidden' : '')}" do
-                    .small-5.columns
-                      = label_tag "Set '#{parameter['label']}' to:", nil, class: 'inline right'
-                    .small-7.columns
-                      = parametrization_options(parameter, parameter_id)
-                = javascript_tag "parametrizationTypeListener(#{parameter_id}, '#{entity_group['id']}', '#{entity['id']}', '#{parameter['id']}');"
+      %p
+        .row(style="text-align:center;")
+          %h3.subheader= t('simulations.conduct_experiment.parametrization_tab.entity_group_header', label: entity_group['label'])
 
-:javascript
-  $(function() {
-    $(".accordion-container").accordion({
-        collapsible: true,
-        heightStyle: "content"
-    });
-  });
+        %div
+          .accordion-container
+            - entity_group['entities'].each do |entity|
+              %h3.subheader= t('simulations.conduct_experiment.parametrization_tab.entity_header', label: entity['label'])
+
+              %div
+                - entity['parameters'].each do |parameter|
+                  - parameter_id += 1
+                  = form_tag '', class: 'custom' do
+                    = content_tag :div, :class => "row #{(parameter.include?('value') ? 'hidden' : '')}" do
+                      .small-5.columns
+                        = label_tag t('simulations.conduct_experiment.parametrization_tab.parameter_header', label: parameter['label']), nil, class: 'inline right'
+                      .small-7.columns
+                        = parametrization_options(parameter, parameter_id)
+                  - content_for :javascript do
+                    :javascript
+                      $(function() {
+                        parametrizationTypeListener(#{parameter_id}, '#{entity_group['id']}', '#{entity['id']}', '#{parameter['id']}')
+                      });
