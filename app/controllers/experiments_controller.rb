@@ -226,19 +226,62 @@ class ExperimentsController < ApplicationController
     moes = @experiment.result_names
     moes = moes.nil? ? ['No MoEs found', 'nil'] : moes.map { |x| [DataFarmingExperiment.output_parameter_label_for(x), x] }
 
-    done_instance = @experiment.find_simulations_by({'is_done' => true}, {limit: 1}).first
+    done_instance = @experiment.find_simulation_docs_by({'is_done' => true}, {limit: 1, fields: %w(arguments)}).first
 
     moes_and_params = if done_instance.nil?
                         ['No input parameters found', 'nil']
                       else
                         moes + [%w(----------- nil)] +
-                            done_instance.arguments.split(',').map { |x| [@experiment.input_parameter_label_for(x), x] }
+                            done_instance['arguments'].split(',').map { |x| [@experiment.input_parameter_label_for(x), x] }
                       end
 
     moes_info[:moes] = moes.map { |label, id| "<option value='#{id}'>#{label}</option>" }.join()
     moes_info[:moes_and_params] = moes_and_params.map { |label, id| "<option value='#{id}'>#{label}</option>" }.join()
 
     render :json => moes_info
+  end
+
+  #  getting parametrization and generated values of every input parameter without default value
+  def extension_dialog
+    @parameters = {}
+
+    @experiment.parameters.flatten.each do |parameter_uid|
+      parameter_doc = @experiment.get_parameter_doc(parameter_uid)
+      next if parameter_doc['with_default_value'] # it means this parameter has only one possible value - the default one
+      parameter_info = {}
+      parameter_info[:label] = @experiment.input_parameter_label_for(parameter_uid)
+      parameter_info[:parametrizationType] = parameter_doc['parametrizationType']
+      parameter_info[:in_doe] = parameter_doc['in_doe']
+      parameter_info[:values] = @experiment.parameter_values_for(parameter_uid)
+
+      @parameters[parameter_uid] = parameter_info
+    end
+
+    Rails.logger.debug("Parameters: #{@parameters}")
+
+    render partial: 'extension_dialog'
+  end
+
+  def extend_input_values
+    parameter_uid = params[:param_name]
+    @range_min, @range_max, @range_step = params[:range_min].to_f, params[:range_max].to_f, params[:range_step].to_f
+    Rails.logger.debug("New range values: #{@range_min} --- #{@range_max} --- #{@range_step}")
+    new_parameter_values = @range_min.step(@range_max, @range_step).to_a
+    #@priority = params[:priority].to_i
+    Rails.logger.debug("New parameter values: #{new_parameter_values}")
+
+    @num_of_new_simulations = @experiment.add_parameter_values(parameter_uid, new_parameter_values)
+    if @num_of_new_simulations > 0
+      @experiment.create_progress_bar_table.drop
+      @experiment.insert_initial_bar
+
+      # 4. update progress bar
+      Thread.new do
+        Rails.logger.debug("Updating all progress bars --- #{Time.now - @experiment.start_at}")
+        @experiment.update_all_bars
+      end
+    end
+
   end
 
   private

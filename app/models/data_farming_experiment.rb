@@ -54,7 +54,7 @@ class DataFarmingExperiment < MongoActiveRecord
 
     return all, done, sent
   end
-  #
+
   #def argument_names
   #  parameters.flatten.join(',')
   #end
@@ -224,17 +224,17 @@ class DataFarmingExperiment < MongoActiveRecord
     end
 
   end
-  #
-  #def moe_names
-  #  moe_name_set = []
-  #  limit = self.experiment_size > 1000 ? self.experiment_size / 2 : self.experiment_size
-  #  ExperimentInstance.raw_find_by_query(self.experiment_id, { is_done: true }, { fields: %w(result), limit: limit }).each do |instance_doc|
-  #    moe_name_set += instance_doc['result'].keys.to_a
-  #  end
-  #
-  #  moe_name_set.uniq
-  #end
-  #
+
+  def moe_names
+    moe_name_set = []
+    limit = self.experiment_size > 1000 ? self.experiment_size / 2 : self.experiment_size
+    self.find_simulation_docs_by({ is_done: true }, { fields: %w(result), limit: limit }).each do |instance_doc|
+      moe_name_set += instance_doc['result'].keys.to_a
+    end
+
+    moe_name_set.uniq
+  end
+
   #def create_scatter_plot_csv_for(x_axis, y_axis)
   #  CSV.generate do |csv|
   #    csv << [ x_axis, y_axis ]
@@ -262,30 +262,27 @@ class DataFarmingExperiment < MongoActiveRecord
   #  end
   #end
   #
-  #def generated_parameter_values_for(parameter_uid)
-  #  simulation_id = 1
-  #  while (instance = ExperimentInstance.find_by_id(self.experiment_id, simulation_id)).nil?
-  #    simulation_id += 1
-  #  end
-  #
-  #  #Rails.logger.debug("Parameter UID: #{parameter_uid}")
-  #  #Rails.logger.debug("instance.arguments: #{instance.arguments.split(',')}")
-  #  param_index = instance.arguments.split(',').index(parameter_uid)
-  #  param_value = instance.values.split(',')[param_index]
-  #
-  #  find_exp = '^'
-  #  find_exp += "(\\d+\\.\\d+,){#{param_index}}" if param_index > 0
-  #  find_exp = /#{find_exp}#{param_value}/
-  #
-  #  query_hash = { 'values' => { '$not' => find_exp } }
-  #  option_hash = { fields: %w(values) }
-  #
-  #  param_values = ExperimentInstance.raw_find_by_query(self.experiment_id, query_hash, option_hash).
-  #      map { |x| x['values'].split(',')[param_index] }.uniq + [param_value]
-  #
-  #  param_values.map { |x| x.to_f }.uniq.sort
-  #end
-  #
+  def generated_parameter_values_for(parameter_uid)
+    simulation_id = 1
+    while (instance = ExperimentInstance.find_by_id(self.experiment_id, simulation_id)).nil?
+      simulation_id += 1
+    end
+
+    #Rails.logger.debug("Parameter UID: #{parameter_uid}")
+    #Rails.logger.debug("instance.arguments: #{instance.arguments.split(',')}")
+    param_index = instance.arguments.split(',').index(parameter_uid)
+    param_value = instance.values.split(',')[param_index]
+
+    find_exp = '^'
+    find_exp += "(\\d+\\.\\d+,){#{param_index}}" if param_index > 0
+    find_exp = /#{find_exp}#{param_value}/
+
+    param_values = self.find_simulation_docs_by({ 'values' => { '$not' => find_exp } }, { fields: %w(values) }).
+        map { |x| x['values'].split(',')[param_index] }.uniq + [param_value]
+
+    param_values.map { |x| x.to_f }.uniq.sort
+  end
+
   ## return a full experiment input based on partial information given, and using default values for other parameters
   ## doe_list = [ [ doe_id, [ param_1, param_2 ] ], ... ]
   def self.prepare_experiment_input(simulation, partial_experiment_input, doe_list = [])
@@ -324,22 +321,20 @@ class DataFarmingExperiment < MongoActiveRecord
     end
 
   end
-  #
-  #def create_result_csv
-  #  moes = self.moe_names
-  #
-  #  CSV.generate do |csv|
-  #    csv << self.parameters.flatten + moes
-  #
-  #    self.find_simulation_docs_by({ is_done: true }, { fields: %w(values result) }).each do |simulation_doc|
-  #      values = simulation_doc['values'].split(',').map{|x| '%.4f' % x.to_f}
-  #      moe_values = moes.reduce([]){ |tab, moe_name| tab << simulation_doc['result'][moe_name] || '' }
-  #
-  #      csv << values + moe_values
-  #    end
-  #  end
-  #end
-  #
+
+  def create_result_csv
+    CSV.generate do |csv|
+      csv << self.parameters.flatten + self.moe_names
+
+      self.find_simulation_docs_by({ is_done: true }, { fields: %w(values result) }).each do |simulation_doc|
+        values = simulation_doc['values'].split(',').map{|x| '%.4f' % x.to_f}
+        moe_values = self.moe_names.reduce([]){ |tab, moe_name| tab << simulation_doc['result'][moe_name] || '' }
+
+        csv << values + moe_values
+      end
+    end
+  end
+
   #def destroy
   #  # TODO TMP due to problem with routing in PLGCloud
   #  information_service = InformationService.new({'information_service_url' => 'localhost:11300'})
@@ -393,16 +388,16 @@ class DataFarmingExperiment < MongoActiveRecord
 
     simulations_count_with(query)
   end
-  #
-  #def clear_cached_data
-  #  self.cached_value_list = nil
-  #  self.cached_multiple_list = nil
-  #  self.size = nil
-  #  self.labels = nil
-  #
-  #  #self.save_and_cache
-  #end
-  #
+
+  def clear_cached_data
+    self.cached_value_list = nil
+    self.cached_multiple_list = nil
+    self.size = nil
+    self.labels = nil
+
+    self.save_and_cache
+  end
+
   def get_parameter_doc(parameter_uid)
     entity_group_id, entity_id, parameter_id = parameter_uid.split(ID_DELIM)
     self.experiment_input.each do |entity_group|
@@ -434,39 +429,39 @@ class DataFarmingExperiment < MongoActiveRecord
 
   ## returns a list of generated values for the given parameter_uid
   ## it takes into account 'value_list' and 'value_list_extension'
-  #def parameter_values_for(parameter_uid)
-  #  values = []
-  #
-  ##  if this parameter is used in DoE => get all values from doe_info
-  #  if get_parameter_doc(parameter_uid)['in_doe']
-  #
-  #    self.doe_info.each do |method, list_of_parameters, doe_values|
-  #      unless (param_index = list_of_parameters.index(parameter_uid)).nil?
-  #        doe_values.each do |configuration|
-  #          values << configuration[param_index]
-  #        end
-  #        values.uniq!
-  #      end
-  #    end
-  #
-  #  else
-  ##  if not used in DoE => get values from 'value_list' and 'value_list_extension'
-  #    param_index = self.parameters.index(parameter_uid)
-  #    values += value_list[param_index]
-  #
-  #    unless self.value_list_extension.nil?
-  #      self.value_list_extension.each do |param_name, list_of_additional_values|
-  #        if param_name == parameter_uid
-  #          values += list_of_additional_values
-  #        end
-  #      end
-  #    end
-  #
-  #  end
-  #
-  #  values
-  #end
-  #
+  def parameter_values_for(parameter_uid)
+    values = []
+
+  #  if this parameter is used in DoE => get all values from doe_info
+    if get_parameter_doc(parameter_uid)['in_doe']
+
+      self.doe_info.each do |method, list_of_parameters, doe_values|
+        unless (param_index = list_of_parameters.index(parameter_uid)).nil?
+          doe_values.each do |configuration|
+            values << configuration[param_index]
+          end
+          values.uniq!
+        end
+      end
+
+    else
+  #  if not used in DoE => get values from 'value_list' and 'value_list_extension'
+      param_index = self.parameters.index(parameter_uid)
+      values += value_list[param_index]
+
+      unless self.value_list_extension.nil?
+        self.value_list_extension.each do |param_name, list_of_additional_values|
+          if param_name == parameter_uid
+            values += list_of_additional_values
+          end
+        end
+      end
+
+    end
+
+    values
+  end
+
   private
 
   def self.nested_json_to_hash(nested_json)

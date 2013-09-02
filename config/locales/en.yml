@@ -60,6 +60,10 @@ en:
       stats_header: Simulation statistics
       progress_bar_header: Experiment progress bar
       actions_header: Actions
+      # buttons from the monitoring view
+      stop_button: Stop experiment
+      extend_button: Extend
+
 
   simulations:
     deregister_button: Deregister

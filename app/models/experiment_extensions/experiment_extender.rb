@@ -134,10 +134,10 @@ module ExperimentExtender
       Rails.logger.debug("Simulation id: #{old_simulation_id} -> #{new_simulation_id}")
       # make the actual change
       unless old_simulation_id == new_simulation_id
-        simulation = ExperimentInstance.find_by_id(self.experiment_id, old_simulation_id)
+        simulation = self.find_simulation_docs_by({id: old_simulation_id}, {limit: 1}).first
         unless simulation.nil?
-          #simulation.id = new_simulation_id
-          #simulation.save
+          simulation['id'] = new_simulation_id
+          self.save_simulation(simulation)
         end
       end
     end

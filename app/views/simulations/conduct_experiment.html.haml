@@ -20,7 +20,7 @@
     %section.section
       %p.title(style="left: 174px;")
         = link_to t('.input_doe'), '#parameters_values_tab'
-        = ren der 'doe_tab'
+        = render 'doe_tab'
 
   .row.submit-section
     = form_tag start_experiment_experiments_path, onsubmit: 'updateAllInputParameterValues()', id: 'experiment_submit_form' do

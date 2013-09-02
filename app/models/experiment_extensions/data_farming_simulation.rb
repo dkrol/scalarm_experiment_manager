@@ -36,19 +36,19 @@ module DataFarmingSimulation
     end
   end
 
-  def find_simulations_by(query, options = { sort: [ ['id', :asc] ] })
-    simulations = []
-
-    simulation_collection.find(query, options).each{|doc| simulations << ExperimentInstance.new(doc)}
-
-    simulations
-  end
+  #def find_simulations_by(query, options = { sort: [ ['id', :asc] ] })
+  #  simulations = []
+  #
+  #  simulation_collection.find(query, options).each{|doc| simulations << ExperimentInstance.new(doc)}
+  #
+  #  simulations
+  #end
 
   def find_simulation_docs_by(query, options = { sort: [ ['id', :asc] ] })
     simulations = []
 
     simulation_collection.find(query, options).each{|doc|
-      Rails.logger.debug("Doc: #{doc}");
+      #Rails.logger.debug("Doc: #{doc}");
       simulations << doc}
 
     simulations
@@ -56,6 +56,14 @@ module DataFarmingSimulation
 
   def simulations_count_with(query)
     simulation_collection.count(query: query)
+  end
+
+  def save_simulation(simulation_doc)
+    if simulation_doc.include?('_id')
+      simulation_collection.update({'_id' => simulation_doc['_id']}, simulation_doc, {upsert: true})
+    else
+      simulation_collection.update({'id' => simulation_doc['id']}, simulation_doc, {upsert: true})
+    end
   end
 
 end

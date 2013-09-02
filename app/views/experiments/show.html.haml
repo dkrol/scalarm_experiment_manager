@@ -18,8 +18,8 @@
       %section.top-bar-section
         %ul
           - if @experiment.is_running
-            %li= button_to 'Stop experiment', stop_experiment_path(@experiment.id), :onClick => "return confirm('Are you sure?')", class: 'button'
-            %li= button_to 'Extend', '#', id: 'extensionDialogOpenButton', class: 'button'
+            %li= button_to t('.stop_button'), stop_experiment_path(@experiment.id), :onClick => "return confirm('Are you sure?')", class: 'button'
+            %li= button_to t('.extend_button'), '#', id: 'extensionDialogOpenButton', class: 'button'
             %li= button_to_function 'Boost', "booster.openDialog('#{get_booster_dialog_experiment_path(@experiment.id)}');", class: 'button'
             %li= button_to_function 'Set scheduling', "$('#scheduling_policy_dialog').foundation('reveal', 'open'); $('#scheduling-ajax-response').html('');", class: 'button'
           - else
@@ -31,6 +31,8 @@
           %li= button_to_function 'Progress information', "$('#progress_information').slideToggle(); $('html, body').animate({ scrollTop: $('#progress_information').offset().top }, 1000);", class: 'button'
           %li= image_tag 'loading.gif', :id => 'loading-img', :style => 'display: none;'
 
+#extension-dialog.reveal-modal
+
 - content_for :javascript do
   :javascript
     $(function() {
@@ -38,4 +40,11 @@
 
       var monitor = new window.ExperimentMonitor('#{@experiment.id}');
       monitor.generate_html('experiment_stats')
+
+      // handling ajax loading of the Extension dialog
+      $('#extensionDialogOpenButton').on('click', function() {
+        $('#extension-dialog').load( "#{extension_dialog_experiment_path(@experiment.id)}" );
+        $('#extension-dialog').foundation('reveal', 'open');
+        return false;
+      });
     });

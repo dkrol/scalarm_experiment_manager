@@ -34,10 +34,10 @@ ScalarmExperimentManager::Application.routes.draw do
 
       post  :stop
       #post  :destroy
-      #post  :extend_input_values
+      post  :extend_input_values
       #get   :intermediate_results
       get   :get_booster_dialog
-      #get   :extension_dialog
+      get   :extension_dialog
       #post  :change_scheduling_policy
 
       # experiment charts
