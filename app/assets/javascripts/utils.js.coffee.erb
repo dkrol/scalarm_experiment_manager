@@ -1,0 +1,12 @@
+
+window.show_notice = (message) ->
+  $('.notice').html(message)
+  $('.notice').show('slide', 1000)
+
+window.hide_notice = () ->
+  $('.notice').hide()
+
+window.show_loading_notice = () ->
+  $('.notice').html("<div class='preloader'/>")
+  $('.notice').css('height', '35px')
+  $('.notice').show('slide', 1000)

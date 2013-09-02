@@ -63,6 +63,12 @@ en:
       # buttons from the monitoring view
       stop_button: Stop experiment
       extend_button: Extend
+      boost_button: Boost
+      scheduling_button: Set scheduling
+      destroy_button: Destroy
+      download_results_button: Download results
+      get_configurations_button: Get configurations
+      progress_information_button: Show progress
 
 
   simulations:

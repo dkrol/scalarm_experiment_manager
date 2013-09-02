@@ -34,14 +34,14 @@
 
       <div class="clearall"></div>
 
-      <div class="notice" style="display: none;">
+      <div class="notice alert-box radius" style="display: none;">
         <%= flash[:notice] if flash[:notice] %>
       </div>
       <% content_for :javascript do %>
         <%= javascript_tag("$('.notice').show();") if flash[:notice]  %>
       <% end %>
 
-      <div class="error" style="display: none;">
+      <div class="error alert-box alert radius" style="display: none;">
         <%= flash[:error] if flash[:error] %>
       </div>
       <% content_for :javascript do %>
@@ -53,6 +53,14 @@
     </div>
 
     <%= javascript_include_tag "application" %>
+
+    <%= content_for :javascript do %>
+        <script>
+          $(function() {
+//             window.show_loading_notice();
+          });
+        </script>
+    <% end %>
 
     <%= yield :javascript %>
   </body>
