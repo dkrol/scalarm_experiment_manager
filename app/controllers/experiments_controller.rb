@@ -283,6 +283,74 @@ class ExperimentsController < ApplicationController
 
   end
 
+  def running_simulations_table
+  end
+
+  def completed_simulations_table
+  end
+
+  def intermediate_results
+    unless @experiment.parameters.blank?
+      arguments = @experiment.parameters.flatten
+
+      results = if params[:simulations] == 'running'
+                  @experiment.find_simulation_docs_by({to_sent: false, is_done: false})
+                  #ExperimentInstance.find_by_query(@experiment.experiment_id, {'to_sent' => false, 'is_done' => false})
+                elsif params[:simulations] == 'completed'
+                  @experiment.find_simulation_docs_by({is_done: true})
+                  #ExperimentInstance.find_by_query(@experiment.experiment_id, {'is_done' => true})
+                end
+
+      result_column = if params[:simulations] == 'running'
+                        'tmp_result'
+                      elsif params[:simulations] == 'completed'
+                        'result'
+                      end
+
+      results = results.map{ |simulation|
+        split_values = simulation['values'].split(',')
+        modified_values = @experiment.range_arguments.reduce([]){|acc, param_uid| acc << split_values[arguments.index(param_uid)]}
+        time_column = if params[:simulations] == 'running'
+                        simulation['sent_at'].strftime('%Y-%m-%d %H:%M')
+                              elsif params[:simulations] == 'completed'
+                                "#{simulation['done_at'] - simulation['sent_at']} [s]"
+                              end
+
+        [
+            simulation['id'],
+            time_column,
+            simulation[result_column].to_s || 'No data available',
+            modified_values
+        ].flatten
+      }
+
+      render json: { 'aaData' => results }.as_json
+    else
+      render json: { 'aaData' => [] }.as_json
+    end
+  end
+
+  def change_scheduling_policy
+    new_scheduling_policy = params[:scheduling_policy]
+
+    @experiment.scheduling_policy = new_scheduling_policy
+    msg = if @experiment.save_and_cache
+      'The scheduling policy of the experiment has been changed.'
+    else
+      'The scheduling policy of the experiment could not have been changed due to internal server issues.'
+    end
+
+    respond_to do |format|
+      format.js {
+        render :inline => "
+          $('#scheduling-busy').hide();
+          $('#scheduling-ajax-response').html('#{msg}');
+          $('#policy_name').html('#{new_scheduling_policy}');
+        "
+      }
+    end
+  end
+
   private
 
   def load_experiment

@@ -58,23 +58,23 @@ class DataFarmingExperiment < MongoActiveRecord
   #def argument_names
   #  parameters.flatten.join(',')
   #end
-  #
-  #def range_arguments
-  #  params_with_range = []
-  #
-  #  self.experiment_input.each do |entity_group|
-  #    entity_group['entities'].each do |entity|
-  #      entity['parameters'].each do |parameter|
-  #        if parameter['parametrizationType'] == 'range'
-  #          params_with_range << parameter_uid(entity_group, entity, parameter)
-  #        end
-  #      end
-  #    end
-  #  end
-  #
-  #  params_with_range
-  #end
-  #
+
+  def range_arguments
+    params_with_range = []
+
+    self.experiment_input.each do |entity_group|
+      entity_group['entities'].each do |entity|
+        entity['parameters'].each do |parameter|
+          if parameter['parametrizationType'] == 'range'
+            params_with_range << parameter_uid(entity_group, entity, parameter)
+          end
+        end
+      end
+    end
+
+    params_with_range
+  end
+
   #def parametrization_of(parameter_uid)
   #  self.experiment_input.each do |entity_group|
   #    entity_group['entities'].each do |entity|

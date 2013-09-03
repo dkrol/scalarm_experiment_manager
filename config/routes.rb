@@ -35,18 +35,18 @@ ScalarmExperimentManager::Application.routes.draw do
       post  :stop
       #post  :destroy
       post  :extend_input_values
-      #get   :intermediate_results
+      get   :intermediate_results
       get   :get_booster_dialog
       get   :extension_dialog
-      #post  :change_scheduling_policy
+      post  :change_scheduling_policy
 
       # experiment charts
       #post :histogram
       #post :scatter_plot
       #post :regression_tree
 
-      #get :running_simulations_table
-      #get :completed_simulations_table
+      get :running_simulations_table
+      get :completed_simulations_table
       #get :experiment_results_table
 
       # Progress monitoring API
