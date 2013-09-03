@@ -719,21 +719,13 @@ select {
 
 article#experiment_stats {
     position: relative;
-    min-height: 250px;
+    min-height: 210px;
 }
 
 #exp_progress_bar_2 {
     width: 100%;
     height: 50px;
     /*border-style: solid*/
-}
-
-.speedometer {
-    width: 350px;
-    height: 250px;
-    position: absolute;
-    top: 35px;
-    right: 0;
 }
 
 .registration_form div {
