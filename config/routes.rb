@@ -33,7 +33,7 @@ ScalarmExperimentManager::Application.routes.draw do
       get   :file_with_configurations
 
       post  :stop
-      #post  :destroy
+      post  :destroy
       post  :extend_input_values
       get   :intermediate_results
       get   :get_booster_dialog

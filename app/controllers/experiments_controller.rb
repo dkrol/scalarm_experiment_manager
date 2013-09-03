@@ -351,6 +351,17 @@ class ExperimentsController < ApplicationController
     end
   end
 
+  def destroy
+    unless @experiment.nil?
+      @experiment.destroy
+      flash[:notice] = 'Your experiment has been destroyed.'
+    else
+      flash[:notice] = 'Your experiment is no longer available.'
+    end
+
+    redirect_to :action => :index
+  end
+
   private
 
   def load_experiment

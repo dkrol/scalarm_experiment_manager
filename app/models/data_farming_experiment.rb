@@ -335,42 +335,40 @@ class DataFarmingExperiment < MongoActiveRecord
     end
   end
 
-  #def destroy
-  #  # TODO TMP due to problem with routing in PLGCloud
-  #  information_service = InformationService.new({'information_service_url' => 'localhost:11300'})
-  #  @storage_manager_url = information_service.get_storage_managers.sample
-  #  # destroy all binary files stored for this experiments
-  #  sm_uuid = SecureRandom.uuid
-  #  temp_password = SimulationManagerTempPassword.create_new_password_for(sm_uuid)
-  #  # TODO TMP due to problem with routing in PLGCloud
-  #  config = {'storage_manager' => { 'address' => 'localhost:20000', 'user' => sm_uuid, 'pass' => temp_password.password} }
-  #  Rails.logger.debug("Destroy config = #{config}")
-  #
-  #  sm_proxy = StorageManagerProxy.new(config)
-  #
-  #  begin
-  #    #1.upto(self.experiment_size).each do |simulation_id|
-  #      success = sm_proxy.delete_experiment_output(self.experiment_id, self.experiment_size)
-  #      Rails.logger.debug("Deletion of experiment output #{experiment_size} completed successfully ? #{success}")
-  #    #end
-  #  rescue Exception => e
-  #    Rails.logger.debug("Data farming experiment destroy error - #{e}")
-  #  end
-  #
-  #  temp_password.destroy
-  #
-  #  # drop simulation table
-  #  @@db[ExperimentInstanceDb.collection_name(self.experiment_id)].drop
-  #  # drop progress bar object
-  #  self.progress_bar_table.drop
-  #  # drop object from relational database
-  #  #experiment = Experiment.find_by_id(self.experiment_id)
-  #  #experiment.destroy if not experiment.nil?
-  #  # self-drop
-  #  @@db['experiments_info'].remove({ experiment_id: self.experiment_id })
-  #  DataFarmingExperiment.destroy({ experiment_id: self.experiment_id })
-  #end
-  #
+  def destroy
+    # TODO TMP due to problem with routing in PLGCloud
+    config = YAML.load_file(File.join(Rails.root, 'config', 'scalarm.yml'))
+    information_service = InformationService.new(config['information_service_url'], config['information_service_user'], config['information_service_pass'])
+
+    @storage_manager_url = information_service.get_list_of('storage').sample
+
+    unless @storage_manager_url
+      # destroy all binary files stored for this experiments
+      sm_uuid = SecureRandom.uuid
+      temp_password = SimulationManagerTempPassword.create_new_password_for(sm_uuid)
+      config = {'storage_manager' => { 'address' => @storage_manager_url, 'user' => sm_uuid, 'pass' => temp_password.password} }
+      Rails.logger.debug("Destroy config = #{config}")
+
+      sm_proxy = StorageManagerProxy.new(config)
+      begin
+        success = sm_proxy.delete_experiment_output(self.experiment_id, self.experiment_size)
+        Rails.logger.debug("Deletion of experiment output #{experiment_size} completed successfully ? #{success}")
+      rescue Exception => e
+        Rails.logger.debug("Data farming experiment destroy error - #{e}")
+      end
+
+      temp_password.destroy
+    end
+
+    # drop simulation table
+    self.simulation_collection.drop
+    # drop progress bar object
+    self.progress_bar_table.drop
+    # self-drop
+    @@db['experiments_info'].remove({ experiment_id: self.experiment_id })
+    DataFarmingExperiment.destroy({ experiment_id: self.experiment_id })
+  end
+
   #def result_names
   #  moe_name_set = Set.new
   #  result_limit = self.experiment_size < 5000 ? self.experiment_size : (self.experiment_size / 2)
