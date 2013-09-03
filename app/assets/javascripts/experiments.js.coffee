@@ -262,12 +262,12 @@ class window.ExperimentBooster
   openDialog: (url) ->
     $("##{@dialog_element_id}").remove()
 
-    $.ajax(url,
-      success: (data, textStatus, xhr) =>
+    $.get(url, '',
+      (data, textStatus, xhr) =>
         $('body').append(data);
         $("##{@dialog_element_id}").dialog({ autoOpen:true, height: 'auto', width: 550, modal: true, resizable: true })
         $('body').foundation()
-    );
+    )
 
   afterSubmit: () ->
     $("##{@dialog_element_id}").dialog('close')

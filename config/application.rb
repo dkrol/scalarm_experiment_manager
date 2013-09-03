@@ -9,6 +9,8 @@ Bundler.require(:default, Rails.env)
 module ScalarmExperimentManager
   class Application < Rails::Application
     config.r_interpreter = RinRuby.new(false)
+
+    config.autoload_paths += %W(#{config.root}/app/models/infrastructure_facades #{config.root}/app/models/infrastructure_facades/amazon_credentials)
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.

@@ -12,6 +12,11 @@ gem 'mongo'
 gem 'bson'
 gem 'bson_ext'
 
+# Amazon EC2 connector
+gem 'aws-sdk'
+
+gem 'encryptor'
+
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 4.0.0'
 
@@ -52,6 +57,8 @@ group :development do
   #gem 'capistrano-thin', group: :development
   gem 'rvm-capistrano', group: :development
 end
+
+
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]

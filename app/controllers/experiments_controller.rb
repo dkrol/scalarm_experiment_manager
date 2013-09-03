@@ -1,3 +1,5 @@
+require 'infrastructure_facades/infrastructure_facade'
+
 class ExperimentsController < ApplicationController
 
   before_filter :load_experiment, except: [:index]
@@ -38,23 +40,21 @@ class ExperimentsController < ApplicationController
       @simulation_scenarios = @current_user.get_simulation_scenarios.sort { |s1, s2| s2.created_at <=> s1.created_at }
 
       @simulation_managers = {}
-      #TODO - uncomment when ready
-      #InfrastructureFacade.get_registered_infrastructures.each do |infrastructure_id, infrastructure_info|
-      #  @simulation_managers[infrastructure_id] = infrastructure_info[:facade].get_running_simulation_managers(current_user)
-      #end
+      InfrastructureFacade.get_registered_infrastructures.each do |infrastructure_id, infrastructure_info|
+        @simulation_managers[infrastructure_id] = infrastructure_info[:facade].get_running_simulation_managers(@current_user)
+      end
     end
 
   end
 
   def get_booster_dialog
     @simulation_managers, @current_states = {}, {}
-    #TODO - uncomment when ready
-    #InfrastructureFacade.get_registered_infrastructures.each do |infrastructure_id, infrastructure_info|
-    #  @simulation_managers[infrastructure_id] = infrastructure_info[:facade].get_running_simulation_managers(current_user)
-    #  @current_states[infrastructure_id] = infrastructure_info[:facade].current_state(current_user)
-    #end
+    InfrastructureFacade.get_registered_infrastructures.each do |infrastructure_id, infrastructure_info|
+      @simulation_managers[infrastructure_id] = infrastructure_info[:facade].get_running_simulation_managers(@current_user)
+      @current_states[infrastructure_id] = infrastructure_info[:facade].current_state(@current_user)
+    end
 
-    render inline: render_to_string(partial: 'booster_dialog', locals: { user: current_user })
+    render inline: render_to_string(partial: 'booster_dialog')
   end
 
   # stops the currently running DF experiment (if any)
@@ -127,11 +127,10 @@ class ExperimentsController < ApplicationController
     data_farming_experiment.insert_initial_bar
     data_farming_experiment.create_simulation_table
 
-    #TODO - uncomment when ready
-    #if params.include?(:computing_power) and (not params[:computing_power].empty?)
-    #  computing_power = JSON.parse(params[:computing_power])
-    #  InfrastructureFacade.schedule_simulation_managers(@current_user, data_farming_experiment.id, computing_power['type'], computing_power['resource_counter'])
-    #end
+    if params.include?(:computing_power) and (not params[:computing_power].empty?)
+      computing_power = JSON.parse(params[:computing_power])
+      InfrastructureFacade.schedule_simulation_managers(@current_user, data_farming_experiment.id, computing_power['type'], computing_power['resource_counter'])
+    end
 
     respond_to do |format|
       format.html { redirect_to experiment_path(data_farming_experiment.id) }

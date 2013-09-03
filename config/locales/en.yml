@@ -70,6 +70,9 @@ en:
       get_configurations_button: Get configurations
       progress_information_button: Show progress
 
+      booster:
+        header: Increase computational power
+
 
   simulations:
     deregister_button: Deregister
@@ -111,3 +114,18 @@ en:
 
       parameters_values_tab:
         header: Here you can specify values for each input parameter you want to explore
+
+  plgrid:
+    login:
+      ok: Your credentials have been updated
+      error: An erroc occured
+    job_submission:
+      authentication_failed: "An exception occured during authentication - %{ex}. Please check if the host is available and the username and password are correct."
+      error: "An exception occured - %{ex}. Please check if the host is available and the username and password are correct."
+      ok: "You have scheduled %{instances_count} jobs"
+      no_credentials: You have to provide Grid credentials first!
+
+  amazon:
+    login:
+      ok:
+      error:

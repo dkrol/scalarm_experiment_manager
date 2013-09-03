@@ -63,6 +63,14 @@ ScalarmExperimentManager::Application.routes.draw do
     #end
   end
 
+  resource :infrastructure do
+    member do
+      post :schedule_simulation_managers
+      get :infrastructure_info
+      post :add_infrastructure_credentials
+    end
+  end
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 

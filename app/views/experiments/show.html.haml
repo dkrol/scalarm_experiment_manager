@@ -20,7 +20,7 @@
           - if @experiment.is_running
             %li= button_to t('.stop_button'), stop_experiment_path(@experiment.id), :onClick => "return confirm('Are you sure?')", class: 'button'
             %li= button_to t('.extend_button'), '#', id: 'extensionDialogOpenButton', class: 'button'
-            %li= button_to_function t('.boost_button'), "booster.openDialog('#{get_booster_dialog_experiment_path(@experiment.id)}');", class: 'button'
+            %li= button_to t('.boost_button'), '#', id: 'boostButton', class: 'button'
             %li= button_to_function t('.scheduling_button'), "$('#scheduling_policy_dialog').foundation('reveal', 'open'); $('#scheduling-ajax-response').html('');", class: 'button'
           - else
             %li= button_to t('.destroy_button'), experiment_path(@experiment.id), method: :delete, onClick: "$('#loading-img').show(); return confirm('Are you sure?')", class: 'button'
@@ -46,6 +46,12 @@
       // handling ajax loading of the Extension dialog
       $('#extensionDialogOpenButton').on('click', function() {
         $('#extension-dialog').load( "#{extension_dialog_experiment_path(@experiment.id)}" );
+        $('#extension-dialog').foundation('reveal', 'open');
+        return false;
+      });
+
+      $('#boostButton').on('click', function() {
+        $('#extension-dialog').load( "#{get_booster_dialog_experiment_path(@experiment.id)}" );
         $('#extension-dialog').foundation('reveal', 'open');
         return false;
       });
