@@ -14,7 +14,7 @@ header, footer, section, aside, nav, article {
 
 body {
     line-height: 1;
-    background: #3384BB #{image_path 'bg01.jpg'} repeat;
+    background: #3384BB url(#{asset_path 'bg01.jpg'}) repeat;
     color: #555;
     font-family: 'Trebuchet MS', Verdana, Arial, Helvetica, sans-serif;
     font-size: 14px;
@@ -52,7 +52,7 @@ select {
 #wrapper {
   position: relative;
   width: 960px;
-  background: #{image_path 'bg03.jpg'} repeat;
+  background: url(#{image_path 'bg03.jpg'}) repeat;
   margin: 5px auto;
   min-height: 535px;
   padding: 10px;
