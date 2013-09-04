@@ -14,7 +14,7 @@ header, footer, section, aside, nav, article {
 
 body {
     line-height: 1;
-    background: #3384BB url(<%= asset_path 'bg01.jpg'%>) repeat;
+    background: #3384BB url(<%= image_path 'bg01.jpg'%>) repeat;
     color: #555;
     font-family: 'Trebuchet MS', Verdana, Arial, Helvetica, sans-serif;
     font-size: 14px;
@@ -52,7 +52,7 @@ select {
 #wrapper {
   position: relative;
   width: 960px;
-  background: url(<%= asset_path 'bg03.jpg' %>) repeat;
+  background: url(<%= image_path 'bg03.jpg' %>) repeat;
   margin: 5px auto;
   min-height: 535px;
   padding: 10px;
@@ -222,7 +222,7 @@ margin-left: 20px;
 
 blockquote {
 padding-left: 40px;
-background: transparent url(image-url("openquotes.png")) no-repeat;
+background: transparent url(<%= image_path "openquotes.png" %>) no-repeat;
 font-style: italic;
 }
 
