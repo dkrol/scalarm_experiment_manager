@@ -49,10 +49,10 @@ class DataFarmingExperiment < MongoActiveRecord
 
   def get_statistics
     all  = simulations_count_with({})
-    done = simulations_count_with({'is_done' => true})
     sent = simulations_count_with({'to_sent' => false, 'is_done' => false})
+    done = simulations_count_with({'is_done' => true})
 
-    return all, done, sent
+    return all, sent, done
   end
 
   #def argument_names

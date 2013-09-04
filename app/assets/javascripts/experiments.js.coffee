@@ -145,7 +145,19 @@ class window.ExperimentMonitor
     $.getJSON "/experiments/#{monitor.experiment_id}/experiment_stats", (data) -> monitor.update_statistics(data)
     $.getJSON "/experiments/#{monitor.experiment_id}/experiment_moes", (data) -> monitor.update_moes(data)
 
-  update_statistics: (statistics) ->
+  progress_bar_listener: (event) =>
+    x = event.x
+    canvas = $('#exp_progress_bar_2')
+
+    x -= canvas.offset().left
+
+    cellWidth = canvas.width() / @cellCounter
+    cellId = Math.floor((x / cellWidth) + 1)
+
+    $('#extension-dialog').load("/experiments/#{@experiment_id}/simulations/#{cellId}")
+    $('#extension-dialog').foundation('reveal', 'open')
+
+  update_statistics: (statistics) =>
     $("#exp_all_counter").html(statistics.all.toString().with_delimeters())
 #    $("#exp_generated_counter").html(statistics.generated.toString().with_delimeters())
     $("#exp_sent_counter").html(statistics.sent.toString().with_delimeters())
@@ -157,16 +169,21 @@ class window.ExperimentMonitor
     context = canvas.getContext("2d")
     part_width = canvas.width / bar_colors.length
 
-    context.fillStyle = "rgb(255, 255, 255)";
-    context.fillRect(0, 10, canvas.width, canvas.height - 10);
+    context.fillStyle = "rgb(255, 255, 255)"
+    context.fillRect(0, 10, canvas.width, canvas.height - 10)
+
+    @bar_cells = []
+    @cellCounter = bar_colors.length
 
     for i in [0..bar_colors.length]
       context.fillStyle = if(bar_colors[i] == 0) then "#BDBDBD" else "rgb(0, #{bar_colors[i]}, 0)"
 
       if i == bar_colors.length - 1
         context.fillRect(part_width * i, 10, part_width, canvas.height - 10)
+        @bar_cells.push([part_width * i, part_width * i + part_width])
       else
         context.fillRect(part_width * i, 10, part_width*0.95, canvas.height - 10)
+        @bar_cells.push([part_width * i, part_width * i + part_width*0.95])
 
     if(statistics.avg_simulation_time != undefined)
       $("#ei_perform_time_avg").html(statistics.avg_simulation_time)
@@ -217,6 +234,9 @@ class window.ExperimentMonitor
 #        .append($('<span>').attr('id', 'predicted_finish_time')).hide())
 
     $("#experiment_progress_bar").append($('<canvas>').attr('id', 'exp_progress_bar_2'))
+
+    canvas = document.getElementById("exp_progress_bar_2")
+    canvas.addEventListener('mousedown', @progress_bar_listener, false)
 
     monitor = this
 

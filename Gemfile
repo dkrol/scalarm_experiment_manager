@@ -15,6 +15,7 @@ gem 'bson_ext'
 # Amazon EC2 connector
 gem 'aws-sdk'
 
+gem 'rubyzip'
 gem 'encryptor'
 
 # Use SCSS for stylesheets

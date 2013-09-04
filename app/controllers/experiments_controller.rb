@@ -1,3 +1,4 @@
+require 'zip'
 require 'infrastructure_facades/infrastructure_facade'
 
 class ExperimentsController < ApplicationController
@@ -360,6 +361,66 @@ class ExperimentsController < ApplicationController
     end
 
     redirect_to :action => :index
+  end
+
+  # modern version of the next_configuration method;
+  # returns a json document with all necessary information to start a simulation
+  def next_simulation
+    simulation_doc = {}
+
+    begin
+      raise 'Experiment is not running any more' if not @experiment.is_running
+
+      simulation_to_send = @experiment.get_next_instance
+      Rails.logger.debug("Is simulation nil? #{simulation_to_send}")
+      if simulation_to_send
+        # TODO adding caching capability to the experiment object
+        #simulation_to_send.put_in_cache
+        @experiment.progress_bar_update(simulation_to_send['id'].to_i, 'sent')
+
+        simulation_doc.merge!({'status' => 'ok', 'simulation_id' => simulation_to_send['id'],
+                               'execution_constraints' => { 'time_contraint_in_sec' => @experiment.time_constraint_in_sec },
+                               'input_parameters' => Hash[simulation_to_send['arguments'].split(',').zip(simulation_to_send['values'].split(','))] })
+      else
+        simulation_doc.merge!({'status' => 'all_sent', 'reason' => 'There is no more simulations'})
+      end
+
+    rescue Exception => e
+      Rails.logger.debug("Error while preparing next simulation: #{e}")
+      simulation_doc.merge!({'status' => 'error', 'reason' => e.to_s})
+    end
+
+    render :json => simulation_doc
+  end
+
+  def code_base
+    simulation = @experiment.simulation
+    code_base_dir = Dir.mktmpdir('code_base')
+
+    file_list = %w(input_writer executor output_reader progress_monitor)
+    file_list.each do |filename|
+      unless simulation.send(filename).nil?
+        IO.write("#{code_base_dir}/#{filename}", simulation.send(filename).code)
+      end
+    end
+    IO.binwrite("#{code_base_dir}/simulation_binaries.zip", simulation.simulation_binaries)
+    file_list << 'simulation_binaries.zip'
+
+    zipfile_name = File.join('/tmp', "experiment_#{@experiment._id}_code_base.zip")
+
+    File.delete(zipfile_name) if File.exist?(zipfile_name)
+
+    Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
+      file_list.each do |filename|
+        if File.exist?(File.join(code_base_dir, filename))
+          zipfile.add(filename, File.join(code_base_dir, filename))
+        end
+      end
+    end
+
+    FileUtils.rm_rf(code_base_dir)
+
+    send_file zipfile_name, type: 'application/zip'
   end
 
   private

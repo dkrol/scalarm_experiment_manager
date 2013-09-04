@@ -1,6 +1,7 @@
 require 'simulation'
 
 class SimulationsController < ApplicationController
+  before_filter :load_simulation, only: [:show, :progress_info, :mark_as_complete]
 
   def index
     @simulations = @current_user.get_simulation_scenarios
@@ -84,22 +85,21 @@ class SimulationsController < ApplicationController
   # a life-cycle of a single simulation
 
   def mark_as_complete
-    experiment = DataFarmingExperiment.find_by_id(params[:experiment_id])
-    simulation = ExperimentInstance.cache_get(experiment.experiment_id, params[:id])
-
     response = { status: 'ok' }
-    begin
-      if simulation.nil? or simulation.is_done
-        logger.debug("Experiment Instance #{params[:id]} of experiment #{params[:experiment_id]} is already done or is nil? #{simulation.nil?}")
-      else
-        simulation.is_done = true
-        simulation.to_sent = false
-        simulation.result = JSON.parse(params[:result])
-        simulation.done_at = Time.now
-        simulation.save
-        simulation.remove_from_cache
 
-        experiment.progress_bar_update(params[:id].to_i, 'done')
+    begin
+      if @simulation.nil? or @simulation['is_done']
+        logger.debug("Experiment Instance #{params[:id]} of experiment #{params[:experiment_id]} is already done or is nil? #{@simulation.nil?}")
+      else
+        @simulation['is_done'] = true
+        @simulation['to_sent'] = false
+        @simulation['result'] = JSON.parse(params[:result])
+        @simulation['done_at'] = Time.now
+        @experiment.save_simulation(@simulation)
+        # TODO adding caching capability
+        #@simulation.remove_from_cache
+
+        @experiment.progress_bar_update(@simulation['id'], 'done')
       end
     rescue Exception => e
       Rails.logger.debug("Error in marking a simulation as complete - #{e}")
@@ -110,16 +110,14 @@ class SimulationsController < ApplicationController
   end
 
   def progress_info
-    dfe = DataFarmingExperiment.find_by_id(params[:experiment_id])
-    simulation = ExperimentInstance.find_by_id(dfe.experiment_id, params[:id].to_i)
-
     response = {status: 'ok'}
+
     begin
-      if simulation.nil? or simulation.is_done
-        logger.debug("Simulation #{params[:id]} of experiment #{params[:experiment_id]} is already done or is nil? #{simulation.nil?}")
+      if @simulation.nil? or @simulation['is_done']
+        logger.debug("Simulation #{params[:id]} of experiment #{params[:experiment_id]} is already done or is nil? #{@simulation.nil?}")
       else
-        simulation.tmp_result = JSON.parse(params[:result])
-        simulation.save
+        @simulation['tmp_result'] = JSON.parse(params[:result])
+        @experiment.save_simulation(@simulation)
       end
     rescue Exception => e
       Rails.logger.debug("Error in the 'progress_info' function - #{e}")
@@ -127,6 +125,24 @@ class SimulationsController < ApplicationController
     end
 
     render :json => response
+  end
+
+  def show
+    if @simulation.nil?
+      @simulation = @experiment.generate_simulation_for(params[:id].to_i)
+      @experiment.save_simulation(@simulation)
+    end
+
+    render partial: 'show'
+  end
+
+  private
+
+  def load_simulation
+    @experiment = DataFarmingExperiment.find_by_id(params[:experiment_id])
+    #Rails.logger.debug("Experiment: #{@experiment}")
+    @simulation = @experiment.find_simulation_docs_by({id: params[:id].to_i}, {limit: 1}).first
+    #Rails.logger.debug("Simulation: #{@simulation}")
   end
 
 end

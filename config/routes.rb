@@ -27,8 +27,8 @@ ScalarmExperimentManager::Application.routes.draw do
     end
 
     member do
-      #get   :code_base
-      #get   :next_simulation
+      get   :code_base
+      get   :next_simulation
       #get   :parameter_values
       get   :file_with_configurations
 
@@ -55,12 +55,13 @@ ScalarmExperimentManager::Application.routes.draw do
       get :experiment_moes
     end
 
-    #resources :simulations do
-    #  member do
-    #    post :mark_as_complete
-    #    post :progress_info
-    #  end
-    #end
+    resources :simulations do
+      member do
+        post :mark_as_complete
+        post :progress_info
+        get  :get_simulation_data
+      end
+    end
   end
 
   resource :infrastructure do

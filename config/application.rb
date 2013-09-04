@@ -11,6 +11,9 @@ module ScalarmExperimentManager
     config.r_interpreter = RinRuby.new(false)
 
     config.autoload_paths += %W(#{config.root}/app/models/infrastructure_facades #{config.root}/app/models/infrastructure_facades/amazon_credentials)
+    # TODO this should be taken from the information service registration
+    config.manager_id = 1
+    config.experiment_seeks = {}
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
