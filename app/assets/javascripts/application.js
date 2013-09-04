@@ -19,6 +19,7 @@
 //= require highcharts/highcharts-more
 //= require highcharts/modules/exporting
 //= require jquery.dataTables.min
+//= require jit-yc
 
 
 $(function(){ $(document).foundation(); });

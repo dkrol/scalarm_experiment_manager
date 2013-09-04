@@ -29,7 +29,7 @@ ScalarmExperimentManager::Application.routes.draw do
     member do
       get   :code_base
       get   :next_simulation
-      #get   :parameter_values
+      get   :parameter_values
       get   :file_with_configurations
 
       post  :stop
@@ -41,9 +41,9 @@ ScalarmExperimentManager::Application.routes.draw do
       post  :change_scheduling_policy
 
       # experiment charts
-      #post :histogram
-      #post :scatter_plot
-      #post :regression_tree
+      post :histogram
+      post :scatter_plot
+      post :regression_tree
 
       get :running_simulations_table
       get :completed_simulations_table

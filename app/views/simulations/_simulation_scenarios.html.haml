@@ -1,7 +1,7 @@
 %section.panel.radius.list
   = content_tag :h3, t('simulation_scenario_list.label'), class: 'subheader'
 
-  - if @simulations.empty?
+  - if @simulations.blank?
     .panel.callout.radius
       = content_tag :h4, t('simulation_scenario_list.empty_list'), class: 'subheader'
 

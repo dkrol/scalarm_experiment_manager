@@ -141,3 +141,24 @@ en:
 #    login:
 #      ok:
 #      error:
+
+  charts:
+    hide_button: Hide chart
+    load_button: Load chart
+
+    histogram:
+      section_header: Basic statistics about Measures of Effectiveness
+      header: "Basic statistics about '%{moe}'"
+      select_moe: Select MoE
+      resolution: Number of bars
+
+    regression:
+      section_header: Regression trees
+      header: "Regression tree for the '%{moe}' Measure of Effectiveness"
+      select_moe: Select MoE
+
+    scatter:
+      section_header: Bivariate analysis
+      header: "Scatter plot: '%{x_axis}' versus '%{y_axis}'"
+      select_x: Select values for the X axis (MoE or input)
+      select_y: Select values for the Y axis (MoE or input)

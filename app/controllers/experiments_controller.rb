@@ -38,7 +38,7 @@ class ExperimentsController < ApplicationController
     unless @error_flag
       @running_experiments = @current_user.get_running_experiments.sort { |e1, e2| e2.start_at <=> e1.start_at }
       @historical_experiments = @current_user.get_historical_experiments.sort { |e1, e2| e2.end_at <=> e1.end_at }
-      @simulation_scenarios = @current_user.get_simulation_scenarios.sort { |s1, s2| s2.created_at <=> s1.created_at }
+      @simulations = @current_user.get_simulation_scenarios.sort { |s1, s2| s2.created_at <=> s1.created_at }
 
       @simulation_managers = {}
       InfrastructureFacade.get_registered_infrastructures.each do |infrastructure_id, infrastructure_info|
@@ -421,6 +421,30 @@ class ExperimentsController < ApplicationController
     FileUtils.rm_rf(code_base_dir)
 
     send_file zipfile_name, type: 'application/zip'
+  end
+
+  def histogram
+    @chart = HistogramChart.new(@experiment, params[:moe_name], params[:resolution].to_i)
+  end
+
+  def scatter_plot
+    @chart = ScatterPlotChart.new(@experiment, params[:x_axis], params[:y_axis])
+    @chart.prepare_chart_data
+  end
+
+  def regression_tree
+    @chart = RegressionTreeChart.new(@experiment, params[:moe_name], Rails.configuration.r_interpreter)
+    @chart.prepare_chart_data
+  end
+
+  def parameter_values
+    @parameter_uid = params[:param_name]
+
+    @parameter_uid, @parametrization_type = @experiment.parametrization_of(@parameter_uid)
+
+    @param_type = {}
+    @param_type['type'] = @parametrization_type
+    @param_values = @experiment.generated_parameter_values_for(@parameter_uid)
   end
 
   private

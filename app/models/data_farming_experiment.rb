@@ -235,33 +235,33 @@ class DataFarmingExperiment < MongoActiveRecord
     moe_name_set.uniq
   end
 
-  #def create_scatter_plot_csv_for(x_axis, y_axis)
-  #  CSV.generate do |csv|
-  #    csv << [ x_axis, y_axis ]
-  #
-  #    ExperimentInstance.raw_find_by_query(self.experiment_id, { is_done: true }, { fields: %w(values result arguments) }).each do |simulation_doc|
-  #      simulation_input = Hash[simulation_doc['arguments'].split(',').zip(simulation_doc['values'].split(','))]
-  #
-  #      x_axis_value = if simulation_doc['result'].include?(x_axis)
-  #                       # this is a MoE
-  #                       simulation_doc['result'][x_axis]
-  #                     else
-  #                       # this is an input parameter
-  #                       simulation_input[x_axis]
-  #                     end
-  #      y_axis_value = if simulation_doc['result'].include?(y_axis)
-  #                       # this is a MoE
-  #                       simulation_doc['result'][y_axis]
-  #                     else
-  #                       # this is an input parameter
-  #                       simulation_input[y_axis]
-  #                     end
-  #
-  #      csv << [ x_axis_value, y_axis_value ]
-  #    end
-  #  end
-  #end
-  #
+  def create_scatter_plot_csv_for(x_axis, y_axis)
+    CSV.generate do |csv|
+      csv << [ x_axis, y_axis ]
+
+      self.find_simulation_docs_by({ is_done: true }, { fields: %w(values result arguments) }).each do |simulation_doc|
+        simulation_input = Hash[simulation_doc['arguments'].split(',').zip(simulation_doc['values'].split(','))]
+
+        x_axis_value = if simulation_doc['result'].include?(x_axis)
+                         # this is a MoE
+                         simulation_doc['result'][x_axis]
+                       else
+                         # this is an input parameter
+                         simulation_input[x_axis]
+                       end
+        y_axis_value = if simulation_doc['result'].include?(y_axis)
+                         # this is a MoE
+                         simulation_doc['result'][y_axis]
+                       else
+                         # this is an input parameter
+                         simulation_input[y_axis]
+                       end
+
+        csv << [ x_axis_value, y_axis_value ]
+      end
+    end
+  end
+
   def generated_parameter_values_for(parameter_uid)
     simulation_id = 1
     while (instance = ExperimentInstance.find_by_id(self.experiment_id, simulation_id)).nil?
@@ -369,17 +369,17 @@ class DataFarmingExperiment < MongoActiveRecord
     DataFarmingExperiment.destroy({ experiment_id: self.experiment_id })
   end
 
-  #def result_names
-  #  moe_name_set = Set.new
-  #  result_limit = self.experiment_size < 5000 ? self.experiment_size : (self.experiment_size / 2)
-  #
-  #  ExperimentInstance.raw_find_by_query(self.experiment_id, {is_done: true}, {fields: 'result', limit: result_limit}).each do |simulation_doc|
-  #    moe_name_set += simulation_doc['result'].keys
-  #  end
-  #
-  #  moe_name_set.empty? ? nil : moe_name_set.to_a
-  #end
-  #
+  def result_names
+    moe_name_set = Set.new
+    result_limit = self.experiment_size < 5000 ? self.experiment_size : (self.experiment_size / 2)
+
+    self.find_simulation_docs_by({is_done: true}, {fields: 'result', limit: result_limit}).each do |simulation_doc|
+      moe_name_set += simulation_doc['result'].keys
+    end
+
+    moe_name_set.empty? ? nil : moe_name_set.to_a
+  end
+
 
   def completed_simulations_count_for(secs)
     query = { 'is_done' => true, 'done_at' => { '$gte' => (Time.now - secs)} }
