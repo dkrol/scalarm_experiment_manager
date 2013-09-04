@@ -170,6 +170,8 @@ DEPENDENCIES
   jit-rails
   jquery-rails
   mongo
+  net-scp
+  net-ssh
   rails (= 4.0.0)
   rinruby
   rubyzip
