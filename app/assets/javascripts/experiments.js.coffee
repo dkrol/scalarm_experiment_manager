@@ -152,7 +152,10 @@ class window.ExperimentMonitor
     x -= canvas.offset().left
 
     cellWidth = canvas.width() / @cellCounter
-    cellId = Math.floor((x / cellWidth) + 1)
+    cellId = Math.floor((x / cellWidth) + 1) * @simsPerCell
+    if @simsPerCell > 0
+      randomNumber = Math.floor((Math.random()*@simsPerCell)) # 0..@simsPerCell - 1
+      cellId -= randomNumber
 
     $('#extension-dialog').load("/experiments/#{@experiment_id}/simulations/#{cellId}")
     $('#extension-dialog').foundation('reveal', 'open')
@@ -174,6 +177,8 @@ class window.ExperimentMonitor
 
     @bar_cells = []
     @cellCounter = bar_colors.length
+    @simsPerCell = Math.floor(statistics.all / bar_colors.length)
+    console.log "Simulations per Cell: #{@simsPerCell}"
 
     for i in [0..bar_colors.length]
       context.fillStyle = if(bar_colors[i] == 0) then "#BDBDBD" else "rgb(0, #{bar_colors[i]}, 0)"
