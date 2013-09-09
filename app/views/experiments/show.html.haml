@@ -8,8 +8,7 @@
   %p= t('simulations.conduct_experiment.overview_description', description: @experiment.simulation.description)
 
 %section.panel.radius#monitoring_section
-  %article#experiment_stats
-    %h4.subheader= t('.stats_header')
+  = render 'monitoring_stats'
 
   %article#experiment_progress_bar
     %h4.subheader= t('.progress_bar_header')

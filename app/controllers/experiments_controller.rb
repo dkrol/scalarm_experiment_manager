@@ -191,19 +191,12 @@ class ExperimentsController < ApplicationController
     }
 
     # TODO - mean execution time and predicted time to finish the experiment
-    #if instances_done > 0 and (instances_done % 3 == 0 or instances_done == experiment.experiment_size)
-    #  ei_perform_time_avg = ExperimentInstance.get_avg_execution_time_of_ei(experiment.id)
-    #  ei_perform_time_avg_m = (ei_perform_time_avg / 60.to_f).floor
-    #  ei_perform_time_avg_s = (ei_perform_time_avg - ei_perform_time_avg_m*60).to_i
-    #
-    #  ei_perform_time_avg = ''
-    #  ei_perform_time_avg += "#{ei_perform_time_avg_m} minutes"  if ei_perform_time_avg_m > 0
-    #  ei_perform_time_avg += ' and ' if (ei_perform_time_avg_m > 0) and (ei_perform_time_avg_s > 0)
-    #  ei_perform_time_avg +=  "#{ei_perform_time_avg_s} seconds" if ei_perform_time_avg_s > 0
-    #
-    #  # ei_perform_time_avg = "%.2f" % ei_perform_time_avg
-    #  partial_stats['avg_simulation_time'] = ei_perform_time_avg
-    #
+    if sims_done > 0 and (rand() < (sims_done.to_f / @experiment.experiment_size) or sims_done == @experiment.experiment_size)
+      execution_time = @experiment.find_simulation_docs_by({is_done: true}, {fields: %w(sent_at done_at)}).reduce(0) do |acc, simulation|
+        acc += simulation['done_at'] - simulation['sent_at']
+      end
+      stats['avg_execution_time'] = (execution_time / sims_done).round(2)
+
     #  predicted_finish_time = (Time.now - experiment.start_at).to_f / 3600
     #  predicted_finish_time /= (instances_done.to_f / experiment.experiment_size)
     #  predicted_finish_time_h = predicted_finish_time.floor
@@ -215,7 +208,7 @@ class ExperimentsController < ApplicationController
     #  predicted_finish_time +=  "#{predicted_finish_time_m} minutes" if predicted_finish_time_m > 0
     #
     #  partial_stats["predicted_finish_time"] = predicted_finish_time
-    #end
+    end
 
     render json: stats
   end
