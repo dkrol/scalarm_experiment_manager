@@ -21,7 +21,7 @@
         %li= button_to t('.stop_button'), stop_experiment_path(@experiment.id), :onClick => "return confirm('Are you sure?')", class: 'button'
         %li= button_to t('.extend_button'), '#', id: 'extensionDialogOpenButton', class: 'button'
         %li= button_to t('.boost_button'), '#', id: 'boostButton', class: 'button'
-        %li= button_to_function t('.scheduling_button'), "$('#scheduling_policy_dialog').foundation('reveal', 'open'); $('#scheduling-ajax-response').html('');", class: 'button'
+        %li= button_to t('.scheduling_button'), '#', id: 'schedulingButton', class: 'button'
       - else
         %li= button_to t('.destroy_button'), experiment_path(@experiment.id), method: :delete, onClick: "$('#loading-img').show(); return confirm('Are you sure?')", class: 'button'
 
@@ -65,6 +65,12 @@
       $('#progressButton').on('click', function() {
         $('#progressInformationWrapper').slideToggle();
         $('html, body').animate({ scrollTop: $('#progressInformationWrapper').offset().top }, 1000);
+        return false;
+      });
+
+      $('#schedulingButton').on('click', function() {
+        $('#scheduling_policy_dialog').foundation('reveal', 'open');
+        $('#scheduling-ajax-response').html('');
         return false;
       });
     });

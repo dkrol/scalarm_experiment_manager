@@ -37,7 +37,7 @@ gem 'jquery-rails'
 gem 'haml'
 gem 'zurb-foundation'
 gem 'highcharts-rails'
-gem "jit-rails"
+gem 'jit-rails'
 
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 gem 'turbolinks'
@@ -51,7 +51,8 @@ group :doc do
 end
 
 # Use unicorn as the app server
-gem 'thin'
+gem 'puma'
+#gem 'thin'
 
 # Use Capistrano for deployment
 # Use Capistrano for deployment

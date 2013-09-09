@@ -8,15 +8,16 @@ ScalarmExperimentManager::Application.load_tasks
 namespace :service do
   desc 'Start the service'
   task :start => :environment do
-    config = YAML::load(File.open(File.join(Rails.root, 'config', 'scalarm.yml')))
-    puts "thin start -d -C config/thin.yml"
-
-    %x[thin start -d -C config/thin.yml]
+    #config = YAML::load(File.open(File.join(Rails.root, 'config', 'scalarm.yml')))
+    #puts "thin start -d -C config/thin.yml"
+    #%x[thin start -d -C config/thin.yml]
+    %x[pumactl -F config/puma.rb -T scalarm start]
   end
 
   desc 'Stop the service'
   task :stop => :environment do
-    %x[thin stop -C config/thin.yml]
+    #%x[thin stop -C config/thin.yml]
+    %x[pumactl -F config/puma.rb -T scalarm stop]
   end
 
 end
