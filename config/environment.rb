@@ -5,3 +5,6 @@ require File.expand_path('../application', __FILE__)
 ScalarmExperimentManager::Application.initialize!
 
 Encryptor.default_options.merge!(:key => Digest::SHA256.hexdigest('QjqjFK}7|Xw8DDMUP-O$yp'))
+
+# Start infrastructure Monitoring
+InfrastructureFacade.start_monitoring
