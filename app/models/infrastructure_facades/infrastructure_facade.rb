@@ -47,13 +47,13 @@ class InfrastructureFacade
   end
 
   def self.start_monitoring
-    get_registered_infrastructures.each do |infrastructure_id, infrastructure_information|
-      Rails.logger.info("Starting monitoring thread of '#{infrastructure_id}'")
-
-      Thread.new do
-        infrastructure_information[:facade].start_monitoring
-      end
-    end
+    #get_registered_infrastructures.each do |infrastructure_id, infrastructure_information|
+    #  Rails.logger.info("Starting monitoring thread of '#{infrastructure_id}'")
+    #
+    #  Thread.new do
+    #    infrastructure_information[:facade].start_monitoring
+    #  end
+    #end
   end
 
   def self.schedule_simulation_managers(user, experiment_id, infrastructure_type, job_counter, additional_params = nil)
