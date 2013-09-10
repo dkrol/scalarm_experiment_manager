@@ -452,6 +452,15 @@ class ExperimentsController < ApplicationController
 
         redirect action: :index
       end
+
+    elsif @sm_user
+      @experiment = DataFarmingExperiment.find_by_query({'_id' => BSON::ObjectId(params['id'])})
+
+      if @experiment.nil?
+        flash[:error] = "Experiment '#{params['id']}' for user '#{@current_user.login}' not found"
+
+        redirect action: :index
+      end
     end
   end
 

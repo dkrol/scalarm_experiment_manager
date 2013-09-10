@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
   protected
 
   def authenticate
-    @current_user = nil
+    @current_user = nil; @sm_user = false
 
     # if the user is within a session
     if session[:user]
@@ -39,7 +39,10 @@ class ApplicationController < ActionController::Base
 
           unless temp_pass.nil?
             Rails.logger.debug("[authentication] SM using uuid: '#{sm_uuid}'")
-            (not temp_pass.nil?) and temp_pass.password == password
+            correct = (not temp_pass.nil?) and temp_pass.password == password
+            @sm_user = true if correct
+
+            correct
           else
             Rails.logger.debug("[authentication] using login: '#{sm_uuid}'")
             @current_user = ScalarmUser.authenticate_with_password(sm_uuid, password)
