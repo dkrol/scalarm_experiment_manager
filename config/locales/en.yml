@@ -117,6 +117,8 @@ en:
       submit_button: Start experiment
       experiment_size_button: Calculate experiment size
       experiment_size_dialog_body: "Calculated experiment size - <span id=\"calculated-experiment-size\"></span> simulations"
+      time_constraint_label: Time constraint for simulation execution ([s])
+      repeatation_label: Execution repeatation of each input parameters combination
 
       parametrization_tab:
         header: Here you can specify type of parametrization for each input parameter

@@ -111,8 +111,8 @@ class ExperimentsController < ApplicationController
                                                          'experiment_input' => @experiment_input,
                                                          'name' => @simulation.name,
                                                          'is_running' => true,
-                                                         'run_counter' => 1,
-                                                         'time_constraint_in_sec' => 3600,
+                                                         'run_counter' => params[:run_index].to_i,
+                                                         'time_constraint_in_sec' => params[:execution_time_constraint].to_i,
                                                          'doe_info' => doe_info,
                                                          'start_at' => Time.now,
                                                          'user_id' => @current_user.id,
@@ -154,6 +154,7 @@ class ExperimentsController < ApplicationController
     # create the new type of experiment object
     experiment = DataFarmingExperiment.new({'simulation_id' => @simulation.id,
                                             'experiment_input' => @experiment_input,
+                                            'run_counter' => params[:run_index].to_i,
                                             'name' => @simulation.name,
                                             'doe_info' => doe_info
                                            })

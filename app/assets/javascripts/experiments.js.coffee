@@ -10,16 +10,12 @@ class window.ExperimentSpeedometer
     @element_id = "speedometer_#{@experiment_id}"
     @interval = 60
 
-    window.scalarm_objects[@element_id] = this
-
   show: ->
-    @prepare_container()
     @prepare_speedometer()
     @update_speed()
-    setInterval("window.scalarm_objects['#{@element_id}'].update_speed()", @interval*1000)
-
-  prepare_container: ->
-    $("article#experiment_stats").append($('<div>').attr('id', @element_id).addClass("speedometer"))
+    setInterval(
+      => @update_speed()
+    , @interval*1000)
 
   prepare_speedometer: ->
     @chart = new Highcharts.Chart({

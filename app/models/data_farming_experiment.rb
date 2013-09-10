@@ -23,16 +23,16 @@ class DataFarmingExperiment < MongoActiveRecord
   #  self.find_by('id', experiment_id)
   #end
 
-  #def self.get_running_experiments
-  #  instances = []
-  #
-  #  collection.find({'is_running' => true}).each do |attributes|
-  #    instances << Object.const_get(name).send(:new, attributes)
-  #  end
-  #
-  #  instances
-  #end
-  #
+  def self.get_running_experiments
+    experiments = []
+
+    collection.find({is_running: true}).each do |attributes|
+      experiments << Object.const_get(name).send(:new, attributes)
+    end
+
+    experiments
+  end
+
   #def is_completed
   #  simulations_count_with({}) == simulations_count_with({'is_done' => true})
   #end
