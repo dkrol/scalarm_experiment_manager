@@ -66,32 +66,32 @@ function buildParameterValuesPartial(parameterIndex, groupId, entityId, paramete
 }
 
 //// DK: generates DOM structure for parameter values specifications according to parametrization type
-//function parameterValuesPartialForInteger(parameter, parametrizationType, parameterId) {
-//    var container = $("#parameter_values_" + parameterId);
-//    container.html($("<h4></h4>").addClass('subheader').html("Parameter '" + parameter.label + "' with ID: " + parameter.id +
-//        " - [ " + parameter.min + ", " + parameter.max + " ]"));
-//
-//    if (parametrizationType == "value") {
-//        var default_value = (parameter.value != undefined) ? parameter.value : parameter.min;
-//        container.append(labeledInput("Set value: ", "parameter_value_" + parameterId, default_value));
-//    }
-//    else if (parametrizationType == "range") {
-//        container.append(labeledInput("Set min: ", "parameter_min_" + parameterId, parameter.min))
-//            .append(labeledInput("Set max: ", "parameter_max_" + parameterId, parameter.max))
-//            .append(labeledInput("Set step: ", "parameter_step_" + parameterId, (parameter.min + parameter.max) / 5.0));
-//    }
-//    else if (parametrizationType == "gauss") {
-//        var mean_value = Math.round((parameter.min + parameter.max) / 2);
-//
-//        container.append(labeledInput("Set distribution mean value: ", "parameter_mean_" + parameterId, mean_value))
-//            .append(labeledInput("Set distribution variance value: ", "parameter_variance_" + parameterId, mean_value))
-//    }
-//    else if (parametrizationType == "uniform") {
-//        container.append(labeledInput("Set distribution min value: ", "parameter_min_" + parameterId, parameter.min))
-//            .append(labeledInput("Set distribution max value: ", "parameter_max_" + parameterId, parameter.max))
-//    }
-//
-//}
+function parameterValuesPartialForInteger(parameter, parametrizationType, parameterId) {
+    var container = $("#parameter_values_" + parameterId);
+    container.html($("<h4></h4>").addClass('subheader').html("Parameter '" + parameter.label + "' with ID: " + parameter.id +
+        " - [ " + parameter.min + ", " + parameter.max + " ]"));
+
+    if (parametrizationType == "value") {
+        var default_value = (parameter.value != undefined) ? parameter.value : parameter.min;
+        container.append(labeledInput("Set value: ", "parameter_value_" + parameterId, default_value));
+    }
+    else if (parametrizationType == "range") {
+        container.append(labeledInput("Set min: ", "parameter_min_" + parameterId, parameter.min))
+            .append(labeledInput("Set max: ", "parameter_max_" + parameterId, parameter.max))
+            .append(labeledInput("Set step: ", "parameter_step_" + parameterId, (parameter.min + parameter.max) / 5.0));
+    }
+    else if (parametrizationType == "gauss") {
+        var mean_value = Math.round((parameter.min + parameter.max) / 2);
+
+        container.append(labeledInput("Set distribution mean value: ", "parameter_mean_" + parameterId, mean_value))
+            .append(labeledInput("Set distribution variance value: ", "parameter_variance_" + parameterId, mean_value))
+    }
+    else if (parametrizationType == "uniform") {
+        container.append(labeledInput("Set distribution min value: ", "parameter_min_" + parameterId, parameter.min))
+            .append(labeledInput("Set distribution max value: ", "parameter_max_" + parameterId, parameter.max))
+    }
+
+}
 
 // DK: generates DOM structure for parameter values specifications according to parametrization type
 function parameterValuesPartialForFloat(parameter, parametrizationType, parameterId) {

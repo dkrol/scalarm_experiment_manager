@@ -152,16 +152,13 @@ class ExperimentsController < ApplicationController
     @experiment_input = DataFarmingExperiment.prepare_experiment_input(@simulation, JSON.parse(params['experiment_input']), doe_info)
 
     # create the new type of experiment object
-    data_farming_experiment = DataFarmingExperiment.new({'simulation_id' => @simulation.id,
-                                                         'experiment_input' => @experiment_input,
-                                                         'name' => @simulation.name,
-                                                         'is_running' => true,
-                                                         'run_counter' => 1,
-                                                         'time_constraint_in_sec' => 3600,
-                                                         'doe_info' => doe_info
-                                                        })
+    experiment = DataFarmingExperiment.new({'simulation_id' => @simulation.id,
+                                            'experiment_input' => @experiment_input,
+                                            'name' => @simulation.name,
+                                            'doe_info' => doe_info
+                                           })
 
-    experiment_size = data_farming_experiment.value_list.reduce(1) { |acc, x| acc * x.size }
+    experiment_size = experiment.experiment_size(true)
     Rails.logger.debug("Experiment size is #{experiment_size}")
 
     render :json => {experiment_size: experiment_size}
