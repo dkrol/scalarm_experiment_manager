@@ -48,13 +48,11 @@ class InfrastructureFacade
 
   def self.start_monitoring
     get_registered_infrastructures.each do |infrastructure_id, infrastructure_information|
-      Rails.logger.debug("Starting monitoring thread of '#{infrastructure_id}'")
+      Rails.logger.info("Starting monitoring thread of '#{infrastructure_id}'")
 
-      ActiveRecord::Base.connection.reconnect!
       Thread.new do
         infrastructure_information[:facade].start_monitoring
       end
-      ActiveRecord::Base.connection.reconnect!
     end
   end
 

@@ -23,7 +23,7 @@ class AmazonFacade < InfrastructureFacade
   def start_monitoring
     while true do
       begin
-        Rails.logger.debug("#{Time.now} - Amazon EC2 monitoring thread is working")
+        Rails.logger.info("#{Time.now} - Amazon EC2 monitoring thread is working")
         amazon_vms = AmazonVm.all.group_by(&:user_id)
 
         amazon_vms.each do |user_id, vm_list|
@@ -31,30 +31,30 @@ class AmazonFacade < InfrastructureFacade
           ec2 = get_ec2_for(user)
 
           if ec2.nil?
-            Rails.logger.debug("We cannot monitor VMs for #{user.login} due secrets lacking")
+            Rails.logger.info("We cannot monitor VMs for #{user.login} due secrets lacking")
             next
           end
 
           vm_list.each do |amazon_vm|
-            Rails.logger.debug("[vm #{amazon_vm.vm_id}] checking")
+            Rails.logger.info("[vm #{amazon_vm.vm_id}] checking")
             vm_instance = ec2.instances[amazon_vm.vm_id]
             experiment = DataFarmingExperiment.find_by_id(amazon_vm.experiment_id)
 
             if [:stopped, :terminated].include?(vm_instance.status)
-              Rails.logger.debug("[vm #{amazon_vm.vm_id}] This VM is going to be removed from our db as it is terminated")
+              Rails.logger.info("[vm #{amazon_vm.vm_id}] This VM is going to be removed from our db as it is terminated")
               SimulationManagerTempPassword.find_by_sm_uuid(amazon_vm.sm_uuid).destroy
               amazon_vm.destroy
 
             elsif ([:pending, :running].include?(vm_instance.status) and (amazon_vm.created_at + amazon_vm.time_limit.to_i.minutes < Time.now)) or experiment.nil? or (not experiment.is_running)
-              Rails.logger.debug("[vm #{amazon_vm.vm_id}] This VM is going to be destroyed as it is done or should be done")
+              Rails.logger.info("[vm #{amazon_vm.vm_id}] This VM is going to be destroyed as it is done or should be done")
               vm_instance.terminate
 
             elsif (vm_instance.status == :running) and (not amazon_vm.initialized)
-              Rails.logger.debug("[vm #{amazon_vm.vm_id}] This VM is going to be initialized with SM now")
+              Rails.logger.info("[vm #{amazon_vm.vm_id}] This VM is going to be initialized with SM now")
               initialize_sm_on(amazon_vm, vm_instance)
 
             elsif (vm_instance.status == :pending) and (amazon_vm.created_at + 10.minutes < Time.now)
-              Rails.logger.debug("[vm #{amazon_vm.vm_id}] This VM will be restarted due to not being run for more then 10 minutes")
+              Rails.logger.info("[vm #{amazon_vm.vm_id}] This VM will be restarted due to not being run for more then 10 minutes")
               vm_instance.reboot
             end
 
@@ -62,7 +62,7 @@ class AmazonFacade < InfrastructureFacade
 
         end
       rescue Exception => e
-        Rails.logger.debug("Exception #{e} in Amazon EC2 monitoring")
+        Rails.logger.info("Exception #{e} in Amazon EC2 monitoring")
       end
 
       sleep(60)
