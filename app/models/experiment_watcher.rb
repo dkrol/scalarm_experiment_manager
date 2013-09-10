@@ -5,7 +5,7 @@ class ExperimentWatcher
 
     Thread.new do
       while true do
-        Rails.logger.debug('[experiment_watcher] --- running')
+        Rails.logger.debug("[experiment_watcher] #{Time.now} --- running")
         DataFarmingExperiment.get_running_experiments.each do |experiment|
           Rails.logger.debug("Experiment: #{experiment}")
           begin
@@ -22,7 +22,7 @@ class ExperimentWatcher
           end
         end
 
-        sleep(60)
+        sleep(600)
       end
     end
   end
