@@ -25,83 +25,63 @@ class PLGridFacade < InfrastructureFacade
     "Currently #{jobs_count} jobs are scheduled or running."
   end
 
+  # for each job check
+  # 1. if the experiment is still running - destroy the job otherwise
+  # 2. if the job is started correctly and is not stuck in a queue - restart if yes
+  # 3. if the job is running more then 24 hours  - restart if yes
   def start_monitoring
-    #while true do
-    #  Rails.logger.info("#{Time.now} - PLGrid monitoring thread is working")
-    ##  group jobs by the user_id
-    #  jobs = PlGridJob.all.group_by(&:user_id)
-    ##  for each group - login to the ui using the user credentials
-    #  jobs.each do |user_id, job_list|
-    #
-    #    credentials = GridCredentials.find_by_user_id(user_id)
-    #    Net::SSH.start(credentials.host, credentials.login, password: credentials.password) do |ssh|
-    #      job_list.each do |job|
-    #        scheduler = create_scheduler_facade(job.scheduler_type)
-    #        if job.scheduler_type == 'glite'
-    #          # generate new proxy
-    #          ssh.exec!('voms-proxy-init --voms vo.plgrid.pl')
-    #        end
-    #        #Rails.logger.info("#{Time.now} - checking job #{job.job_id} - current state #{scheduler.current_state(ssh, job)}")
-    #        #Rails.logger.info("Is job scheduled --- #{scheduler.is_job_queued(ssh, job)}")
-    #        #Rails.logger.info("Too long scheduled --- #{(job.created_at + 10.minutes < Time.now)} --- #{job.created_at} --- #{job.created_at + 10.minutes} --- #{Time.now}")
-    #        #Rails.logger.info("Too long running --- #{(job.created_at + 24.hours < Time.now)}")
-    #        #Rails.logger.info("Experiment is valid --- #{((not job.experiment.nil?) and (not job.experiment.is_completed))}")
-    #        #Rails.logger.info("Experiment is not valid --- #{not job.experiment_id.blank? and DataFarmingExperiment.find_by_experiment_id(job.experiment_id).nil?}")
-    #
-    #        #  if the job is not running although it should (create_at + 10.minutes > Time.now) - restart = cancel + start
-    #        if scheduler.is_job_queued(ssh, job) and (job.created_at + 10.minutes < Time.now)
-    #          Rails.logger.info("#{Time.now} - the job will be restarted due to not been run --- #{not job.experiment_id.blank?} --- #{DataFarmingExperiment.find_by_experiment_id(job.experiment_id).nil?}")
-    #          # but first check if the experiment which should be calculated still exists
-    #          if not job.experiment_id.blank? and DataFarmingExperiment.find_by_experiment_id(job.experiment_id).nil?
-    #            Rails.logger.info('The experiment which should be computed no longer exists')
-    #            Rails.logger.info("Destroying temp pass for #{job.sm_uuid}")
-    #            temp_pass = SimulationManagerTempPassword.find_by_sm_uuid(job.sm_uuid)
-    #            Rails.logger.info("It is nil ? --- #{temp_pass.nil?}")
-    #            temp_pass.destroy unless temp_pass.nil?
-    #            job.destroy
-    #          else
-    #            if scheduler.restart(ssh, job)
-    #              job.created_at = Time.now
-    #              job.save
-    #            end
-    #          end
-    #
-    #        elsif (job.created_at + 24.hours < Time.now) and ((not job.experiment.nil?) and (not job.experiment.is_completed))
-    #          #  if the job is running more than 24 h then restart
-    #          Rails.logger.info("#{Time.now} - the job will be restarted due to being run for 24 hours")
-    #
-    #          # but first check if the experiment which should be calculated still exists
-    #          if not job.experiment_id.blank? and DataFarmingExperiment.find_by_experiment_id(job.experiment_id).nil?
-    #            Rails.logger.info('The experiment which should be computed no longer exists')
-    #            Rails.logger.info("Destroying temp pass for #{job.sm_uuid}")
-    #            temp_pass = SimulationManagerTempPassword.find_by_sm_uuid(job.sm_uuid)
-    #            Rails.logger.info("It is nil ? --- #{temp_pass.nil?}")
-    #            temp_pass.destroy unless temp_pass.nil?
-    #            job.destroy
-    #          else
-    #            if scheduler.restart(ssh, job)
-    #              job.created_at = Time.now
-    #              job.save
-    #            end
-    #          end
-    #
-    #        elsif scheduler.is_done(ssh, job) or (job.created_at + job.time_limit.minutes < Time.now)
-    #          Rails.logger.info("#{Time.now} - the job is done or should be already done - so we will destroy it")
-    #          scheduler.cancel(ssh, job)
-    #          Rails.logger.info("Destroying temp pass for #{job.sm_uuid}")
-    #          temp_pass = SimulationManagerTempPassword.find_by_sm_uuid(job.sm_uuid)
-    #          Rails.logger.info("It is nil ? --- #{temp_pass.nil?}")
-    #          temp_pass.destroy unless temp_pass.nil?
-    #          job.destroy
-    #          scheduler.clean_after_job(ssh, job)
-    #        end
-    #      end
-    #    end
-    #  end
-    #
-    #  sleep(60)
-    #end
+    while true do
+      begin
+        Rails.logger.info("[plgrid] #{Time.now} - monitoring thread is working")
+      #  group jobs by the user_id - for each group - login to the ui using the user credentials
+        PlGridJob.all.group_by(&:user_id).each do |user_id, job_list|
 
+          credentials = GridCredentials.find_by_user_id(user_id)
+
+          Net::SSH.start(credentials.host, credentials.login, password: credentials.password) do |ssh|
+            job_list.each do |job|
+              scheduler = create_scheduler_facade(job.scheduler_type)
+              ssh.exec!('voms-proxy-init --voms vo.plgrid.pl') if job.scheduler_type == 'glite' # generate new proxy if glite
+              experiment = DataFarmingExperiment.find_by_experiment_id(job.experiment_id)
+
+              if experiment.nil? or not experiment.is_running
+                Rails.logger.info("Experiment '#{job.experiment_id}' is no longer running => destroy the job and temp password")
+                destroy_and_clean_after(job, scheduler)
+
+              #  if the job is not running although it should (create_at + 10.minutes > Time.now) - restart = cancel + start
+              elsif scheduler.is_job_queued(ssh, job) and (job.created_at + 10.minutes < Time.now)
+
+                Rails.logger.info("#{Time.now} - the job will be restarted due to not been run")
+                scheduler.restart(ssh, job)
+
+              elsif job.created_at + 24.hours < Time.now
+                #  if the job is running more than 24 h then restart
+                Rails.logger.info("#{Time.now} - the job will be restarted due to being run for 24 hours")
+                scheduler.restart(ssh, job)
+
+              elsif scheduler.is_done(ssh, job) or (job.created_at + job.time_limit.minutes < Time.now)
+                Rails.logger.info("#{Time.now} - the job is done or should be already done - so we will destroy it")
+                scheduler.cancel(ssh, job)
+                destroy_and_clean_after(job, scheduler)
+              end
+            end
+          end
+        end
+      rescue Exception => e
+        Rails.logger.error("[plgrid] An exception occured in the monitoring thread --- #{e}")
+      end
+
+      sleep(60)
+    end
+  end
+
+  def destroy_and_clean_after(job, scheduler)
+    Rails.logger.info("Destroying temp pass for #{job.sm_uuid}")
+    temp_pass = SimulationManagerTempPassword.find_by_sm_uuid(job.sm_uuid)
+    Rails.logger.info("It is nil ? --- #{temp_pass.nil?}")
+    temp_pass.destroy unless temp_pass.nil?
+    job.destroy
+    scheduler.clean_after_job(ssh, job)
   end
 
   def start_simulation_managers(user, instances_count, experiment_id, additional_params = {})

@@ -72,6 +72,7 @@ class GliteFacade
   def restart(ssh, job)
     cancel(ssh, job)
     if submit_job(ssh, job)
+      job.created_at = Time.now
       job.save
       true
     else
