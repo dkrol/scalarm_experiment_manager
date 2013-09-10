@@ -20,8 +20,6 @@
   %li.cta-button= link_to_function 'Delete group', "doe_manager.deleteGroup($(this).closest('ul'))", class: 'button'
 
 - content_for :javascript do
-  = javascript_include_tag 'doe_management'
-
   :javascript
     $(function() {
       doe_manager = new DoeManager();
