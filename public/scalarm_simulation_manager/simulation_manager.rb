@@ -26,8 +26,8 @@ raise 'No Experiment manager URL available' if em_url.nil?
 em_proxy = ExperimentManager.new(em_url, config)
 
 sm_url = information_service.get_storage_managers.sample
-raise 'No Storage manager URL available' if sm_url.nil?
-sm_proxy = StorageManager.new(sm_url, config)
+# raise 'No Storage manager URL available' if sm_url.nil?
+sm_proxy = sm_url.nil? ? nil : StorageManager.new(sm_url, config)
 
 # 2. check if an experiment id is specified and if there is no experiment id get one
 #if not config.has_key?('experiment_id')
@@ -180,7 +180,7 @@ while true
     end
     # upload binary_output if provided
     output_binary_file = "#{simulation_dir}/output.tar.gz"
-    if File.exist?(output_binary_file)
+    if File.exist?(output_binary_file) and not sm_proxy.nil?
       puts 'Uploading binary output'
       sm_proxy.upload_binary_output(experiment_id, simulation_input['simulation_id'], output_binary_file)
     end
