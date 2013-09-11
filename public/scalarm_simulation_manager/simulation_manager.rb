@@ -118,8 +118,9 @@ while true
           puts "[progress_monitor] #{Dir.pwd}"
           #config = JSON.parse(IO.read(File.join(sm_root_dir, 'config.json')))
           #experiment_id = config['experiment_id']
-          experiment_id = reader.gets
-          em_url = reader.gets
+          experiment_id = reader.gets.chop
+          simulation_id = reader.gets.chop
+          em_url = reader.gets.chop
           em_proxy = ExperimentManager.new(em_url, config)
           code_base_dir = File.absolute_path(File.join(sm_root_dir, "experiment_#{experiment_id}", 'code_base'))
 
@@ -129,21 +130,7 @@ while true
               progress_monitor_output = %x[#{code_base_dir}/progress_monitor]
               puts "[progress monitor] script output: #{progress_monitor_output}"
 
-              tmp_result_file = 'intermediate_result.json'
-              tmp_result = if File.exists?(tmp_result_file)
-                             puts 'Reading intermediate results from a file'
-                             JSON.parse(IO.read(tmp_result_file))
-                           else # mocking tmp result
-                             JSON.parse({'status' => 'error', 'results' => { }}.to_json)
-                           end
-
-              if tmp_result['status'] == 'ok'
-                puts "[progress monitor] Everything went well -> we will upload the following intermediate results: #{tmp_result['results']}"
-
-                response = em_proxy.report_intermediate_result(experiment_id, simulation_input['simulation_id'], tmp_result['results'])
-
-                puts "[progress monitor] We got the following response: #{response}"
-              end
+              em_proxy.send_results_from('intermediate_result.json', true, experiment_id, simulation_id)
 
               sleep 30
             end
@@ -156,6 +143,7 @@ while true
 
         reader.close
         writer.puts experiment_id
+        writer.puts simulation_input['simulation_id']
         writer.puts em_url
       end
 
@@ -163,7 +151,8 @@ while true
       puts "Executor output: #{executor_output}"
       # 6c.2. killing progress monitor process
       unless progress_monitor_pid.nil?
-        Process.kill('INT', progress_monitor_pid)
+        puts "Killing the '#{progress_monitor_pid}' process"
+        Process.kill('TERM', progress_monitor_pid)
       end
     end
 
@@ -176,22 +165,7 @@ while true
     end
 
     # 6e. upload output json to experiment manager and set the run simulation as done
-    output_file = "#{simulation_dir}/output.json"
-    simulation_output = if File.exists?(output_file)
-                          puts 'Reading simulation output from a file'
-                          JSON.parse(IO.read(output_file))
-                        else
-                          puts 'No file => an error occured'
-                          JSON.parse({ 'status' => 'error', 'results' => { } }.to_json)
-                        end
-
-    if simulation_output['status'] == 'ok'
-      puts "Everything went well -> we will upload the following results: #{simulation_output['results']}"
-
-      response = em_proxy.mark_as_complete(experiment_id, simulation_input['simulation_id'], simulation_output['results'])
-
-      puts "We got the following response: #{response}"
-    end
+    em_proxy.send_results_from("#{simulation_dir}/output.json", false, experiment_id, simulation_input['simulation_id'])
     # upload binary_output if provided
     output_binary_file = "#{simulation_dir}/output.tar.gz"
     if File.exist?(output_binary_file) and not sm_proxy.nil?

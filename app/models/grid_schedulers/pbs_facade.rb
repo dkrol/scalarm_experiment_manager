@@ -79,9 +79,9 @@ class PBSFacade
     <<-eos
 #!/bin/bash
 
-if [[ -n "$TMPDIR" ]]; then echo $TMPDIR; cd $TMPDIR; fi
+if [[ -n "$TMPDIR" ]]; then echo $TMPDIR; cp scalarm_simulation_manager_$1.zip $TMPDIR/;  cd $TMPDIR; fi
 
-unzip ~/scalarm_simulation_manager_$1.zip
+unzip scalarm_simulation_manager_$1.zip
 cd scalarm_simulation_manager_$1
 ruby simulation_manager.rb
     eos

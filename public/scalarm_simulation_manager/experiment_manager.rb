@@ -35,6 +35,29 @@ class ExperimentManager
     path_to("#{experiment_id}/next_simulation")
   end
 
+  def send_results_from(file, intermediate, experiment_id, simulation_id)
+    process = intermediate ? "progress monitor" : "em"
+
+    if File.exists?(file)
+      puts "[#{process}] Reading results from #{file}"
+      results = JSON.parse(IO.read(file))
+
+      if results['status'] == 'ok'
+        puts "[#{process}] Everything went well -> uploading the following results: #{results['results']}"
+        response = if intermediate 
+          report_intermediate_result(experiment_id, simulation_id, results['results'])
+        else
+          mark_as_complete(experiment_id, simulation_id, results['results'])
+        end
+      
+        puts "[#{process}] We got the following response: #{response}"          
+      end
+
+    else
+      puts "[#{process}] No results available"
+    end
+  end
+
   def mark_as_complete(experiment_id, simulation_id, results)
     uri = URI(path_to("#{experiment_id}/simulations/#{simulation_id}/mark_as_complete"))
 
