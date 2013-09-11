@@ -107,14 +107,20 @@ while true
       # 6c.1. progress monitoring scheduling if available
       progress_monitor_pid = nil
       if File.exist?(File.join(code_base_dir, 'progress_monitor'))
+        reader, writer = IO.pipe()
+
         progress_monitor_pid = Process.fork do
           require 'json'
+          writer.close
+
           sm_root_dir = File.join('.', '..', '..')
 
           puts "[progress_monitor] #{Dir.pwd}"
-          config = JSON.parse(IO.read(File.join(sm_root_dir, 'config.json')))
-          experiment_id = config['experiment_id']
-          em_proxy = ExperimentManager.new(config)
+          #config = JSON.parse(IO.read(File.join(sm_root_dir, 'config.json')))
+          #experiment_id = config['experiment_id']
+          experiment_id = reader.gets
+          em_url = reader.gets
+          em_proxy = ExperimentManager.new(em_url, config)
           code_base_dir = File.absolute_path(File.join(sm_root_dir, "experiment_#{experiment_id}", 'code_base'))
 
           if File.exist?(File.join(code_base_dir, 'progress_monitor'))
@@ -147,6 +153,10 @@ while true
           end
 
         end
+
+        reader.close
+        writer.puts experiment_id
+        writer.puts em_url
       end
 
       executor_output = %x[#{code_base_dir}/executor]
