@@ -46,7 +46,7 @@ class PLGridFacade < InfrastructureFacade
 
               if experiment.nil? or not experiment.is_running
                 Rails.logger.info("Experiment '#{job.experiment_id}' is no longer running => destroy the job and temp password")
-                destroy_and_clean_after(job, scheduler)
+                destroy_and_clean_after(job, scheduler, ssh)
 
               #  if the job is not running although it should (create_at + 10.minutes > Time.now) - restart = cancel + start
               elsif scheduler.is_job_queued(ssh, job) and (job.created_at + 10.minutes < Time.now)
