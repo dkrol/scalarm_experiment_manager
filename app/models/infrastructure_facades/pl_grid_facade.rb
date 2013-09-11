@@ -62,7 +62,7 @@ class PLGridFacade < InfrastructureFacade
               elsif scheduler.is_done(ssh, job) or (job.created_at + job.time_limit.minutes < Time.now)
                 Rails.logger.info("#{Time.now} - the job is done or should be already done - so we will destroy it")
                 scheduler.cancel(ssh, job)
-                destroy_and_clean_after(job, scheduler)
+                destroy_and_clean_after(job, scheduler, ssh)
               end
             end
           end
@@ -75,7 +75,7 @@ class PLGridFacade < InfrastructureFacade
     end
   end
 
-  def destroy_and_clean_after(job, scheduler)
+  def destroy_and_clean_after(job, scheduler, ssh)
     Rails.logger.info("Destroying temp pass for #{job.sm_uuid}")
     temp_pass = SimulationManagerTempPassword.find_by_sm_uuid(job.sm_uuid)
     Rails.logger.info("It is nil ? --- #{temp_pass.nil?}")
