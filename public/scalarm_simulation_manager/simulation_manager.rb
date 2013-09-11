@@ -31,7 +31,7 @@ sm_url = information_service.get_storage_managers.sample
 sm_proxy = sm_url.nil? ? nil : StorageManager.new(sm_url, config)
 
 # 1a. if the 'start_at' option set -> wait for this moment to start
-sleep(5) if config.include?('start_at') and (Time.parse(config['start_at']) - Time.now > 0)
+sleep(5) while config.include?('start_at') and (Time.parse(config['start_at']) - Time.now > 0)
 
 # 2. check if an experiment id is specified and if there is no experiment id get one
 #if not config.has_key?('experiment_id')
