@@ -21,19 +21,25 @@
 
             .row
               .small-6.columns
-                = label_tag 'Instance count:', nil, class: 'inline right'
+                = label_tag t('.submission.instance_counter'), nil, class: 'inline right'
               .small-6.columns
                 = text_field_tag :job_counter
             .row
               .small-6.columns
-                = label_tag 'VM type:', nil, class: 'inline right'
+                = label_tag t('.submission.vm_type'), nil, class: 'inline right'
               .small-6.columns
                 = select_tag :instance_type, options_for_select(AmazonVm.amazon_instance_types)
             .row
               .small-6.columns
-                = label_tag 'Job time constraint [min]:', nil, class: 'inline right'
+                = label_tag t('infrastructure.information.time_constraint'), nil, class: 'inline right'
               .small-6.columns
                 = text_field_tag :time_limit
+
+            .row
+              .small-6.columns
+                = label_tag t('infrastructure.information.start_at'), nil, class: 'inline right'
+              .small-6.columns
+                = text_field_tag :start_at
 
             .row
               %ul.inline-list

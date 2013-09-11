@@ -11,7 +11,7 @@ require 'yaml'
 
 class InfrastructureFacade
 
-  def prepare_configuration_for_simulation_manager(sm_uuid, user_id, experiment_id)
+  def prepare_configuration_for_simulation_manager(sm_uuid, user_id, experiment_id, start_at = '')
     Dir.chdir('/tmp')
     FileUtils.cp_r(File.join(Rails.root, 'public', 'scalarm_simulation_manager'), "scalarm_simulation_manager_#{sm_uuid}")
     # prepare sm configuration
@@ -25,6 +25,10 @@ class InfrastructureFacade
         experiment_manager_user: temp_password.sm_uuid,
         experiment_manager_pass: temp_password.password,
     }
+
+    if start_at != ''
+      sm_config['start_at'] = Time.parse(start_at)
+    end
 
     IO.write("/tmp/scalarm_simulation_manager_#{sm_uuid}/config.json", sm_config.to_json)
     # zip all files

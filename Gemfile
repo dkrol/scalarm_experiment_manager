@@ -55,14 +55,11 @@ gem 'puma'
 #gem 'thin'
 
 # Use Capistrano for deployment
-# Use Capistrano for deployment
-group :development do
-  gem 'capistrano', group: :development
+#group :development do
+#  gem 'capistrano', group: :development
   #gem 'capistrano-thin', group: :development
-  gem 'rvm-capistrano', group: :development
-end
-
-
+  #gem 'rvm-capistrano', group: :development
+#end
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]

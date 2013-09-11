@@ -13,19 +13,25 @@
             = hidden_field_tag 'infrastructure_type', 'plgrid'
             .row
               .small-6.columns
-                = label_tag 'Number of jobs:', nil, class: 'inline right'
+                = label_tag t('.submission.job_counter'), nil, class: 'inline right'
               .small-6.columns
                 = text_field_tag :job_counter
             .row
               .small-6.columns
-                = label_tag 'Scheduler:', nil, class: 'inline right'
+                = label_tag t('.submission.scheduler'), nil, class: 'inline right'
               .small-6.columns
                 = select_tag :scheduler, options_for_select([ ['Portable Batch System', 'qsub'], ['gLite', 'glite'] ])
             .row
               .small-6.columns
-                = label_tag 'Job time constraint [min]:', nil, class: 'inline right'
+                = label_tag t('infrastructure.information.time_constraint'), nil, class: 'inline right'
               .small-6.columns
                 = text_field_tag :time_limit
+
+            .row
+              .small-6.columns
+                = label_tag t('infrastructure.information.start_at'), nil, class: 'inline right'
+              .small-6.columns
+                = text_field_tag :start_at
 
             .row
               %ul.inline-list

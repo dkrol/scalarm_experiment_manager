@@ -100,7 +100,8 @@ class AmazonFacade < InfrastructureFacade
           vm_id: instance.instance_id,
           instance_type: instance.instance_type,
           sm_uuid: SecureRandom.uuid,
-          initialized: false
+          initialized: false,
+          start_at: additional_params['start_at']
                          })
       amazon_vm.save
     end
@@ -209,7 +210,7 @@ class AmazonFacade < InfrastructureFacade
   end
 
   def initialize_sm_on(vm_record, vm_instance)
-    prepare_configuration_for_simulation_manager(vm_record.sm_uuid, vm_record.user_id, vm_record.experiment_id)
+    prepare_configuration_for_simulation_manager(vm_record.sm_uuid, vm_record.user_id, vm_record.experiment_id, vm_record.start_at)
 
     user_amis, experiment_ami = AmazonAmi.find_all_by_user_id(vm_record.user_id), nil
     user_amis.each do |ami|
