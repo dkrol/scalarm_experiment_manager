@@ -16,7 +16,6 @@
 
               %div
                 - entity['parameters'].each do |parameter|
-                  - Rails.logger.debug("Parameter: #{parameter}")
                   - parameter_id += 1
                   = form_tag '', class: 'custom' do
                     = content_tag :div, :class => "row #{(parameter.include?('value') ? 'hidden' : '')}" do
