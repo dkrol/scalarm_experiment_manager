@@ -121,13 +121,13 @@ en:
       repeatation_label: Execution repeatation of each input parameters combination
 
       parametrization_tab:
-        header: Here you can specify type of parametrization for each input parameter
-        entity_group_header: "Entities of group '%{label}'"
-        entity_header: "Entity '%{label}'"
-        parameter_header: "Set '%{label}' to:"
+        header: Specify parametrization for each input parameter below
+        entity_group_header: "Group - '%{label}'"
+        entity_header: "'%{label}'"
+        parameter_header: "Set parameter '%{label}' to:"
 
       parameters_values_tab:
-        header: Here you can specify values for each input parameter you want to explore
+        header: Specify values for each input parameter you want to explore
 
   plgrid:
     login:
