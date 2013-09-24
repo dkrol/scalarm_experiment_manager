@@ -347,3 +347,11 @@ class window.WindowManager
 
     largest_z_index = Math.max.apply(Math, z_indexes)
     $('#' + id).css("z-index", largest_z_index + 1)
+
+
+window.show_dialog_for_new_parameter_value = (parameter_id, parameter_label, url, experiment_id) ->
+  $('#extensionDialogOpenButton').click()
+
+  $('#extension-dialog').on 'extension-dialog-loaded', =>
+    $('#extension-dialog #param_name').val(parameter_id)
+    $('#extension-dialog #param_name').trigger('change')

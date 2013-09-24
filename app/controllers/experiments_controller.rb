@@ -273,6 +273,19 @@ class ExperimentsController < ApplicationController
       end
     end
 
+    flash[:notice] = "#{@num_of_new_simulations} simulations were created"
+
+    redirect_to action: :show, id: @experiment.id
+    # TODO - critical fix to be an ajax based action
+    #respond_to do |format|
+    #  format.js {
+    #    render :inline => "
+    #      window.show_notice(\"#{@num_of_new_simulations} simulations were created\");
+    #      setTimeout(\"window.hide_notice();\", 10000);
+    #    "
+    #  }
+    #end
+    #render partial: 'extend_input_values'
   end
 
   def running_simulations_table

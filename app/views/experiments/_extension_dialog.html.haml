@@ -1,5 +1,5 @@
 %h2 Experiment extension dialog
-= form_tag extend_input_values_experiment_path, remote: true, class: 'custom', id: 'experiment-extension-form', onsubmit: "window.show_loading_notice();" do
+= form_tag(extend_input_values_experiment_path, :onSubmit => "window.show_loading_notice();", remote: true, class: 'custom', id: 'experiment-extension-form') do
   = select_tag 'param_name', options_for_select(@parameters.map{|parameter_uid, parameter_info| [ parameter_info[:label], parameter_uid ] }), class: 'expand'
 
   - counter = 0
@@ -36,7 +36,10 @@
 
     $('#experiment-extension-form [type=submit]').on('click', function() {
       $( '#extension-dialog' ).foundation('reveal', 'close');
+      $( '#extension-dialog' ).html("")
     });
 
     $('body').foundation();
+
+    $('#extension-dialog').trigger('extension-dialog-loaded');
   });

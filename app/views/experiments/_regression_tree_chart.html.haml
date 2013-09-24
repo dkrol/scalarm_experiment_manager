@@ -14,9 +14,10 @@
     .container
       .infovis{ id: "infovis_#{ chart.experiment.experiment_id }_#{ chart.moe_name }"}
 
-  = javascript_tag "$(function() { init_#{chart.experiment.experiment_id}_#{chart.moe_name}(#{chart.experiment.experiment_id}, '#{chart.moe_name}') })"
   :javascript
     $(function() {
+      init_#{chart.experiment.experiment_id}_#{chart.moe_name}('#{chart.experiment.experiment_id}', '#{chart.moe_name}');
+
       $('.plot .button').on('click', function() {
         $(this).parent().parent().remove()
       });

@@ -1,11 +1,8 @@
 //input parameters: experiment, moe_name, tree_nodes
-
 i = rt_chart_tab.length;
 $("#regression_charts").prepend("<div id='rt_chart_"+i+"'></div>");
 
 rt_chart_tab[i] = $("#rt_chart_" + i);
-
-$('div#rt_chart_' + i).html("<%= escape_javascript( render partial: 'regression_tree_chart', locals: { chart: @chart } ) %>")
 
 <% if @chart.tree_nodes %>
 
@@ -53,7 +50,7 @@ function init_<%= "#{@chart.experiment.experiment_id}_#{@chart.moe_name}" %>(exp
 	  var separation_index = node.name.indexOf("|");
 
       if(node.name.charAt(node.name.length - 1) != '|') {
-          label.innerHTML =  "<img src='/images/add-icon.png' onClick=\"" +
+          label.innerHTML =  "<img src='<%= image_path('add-icon.png') %>' onClick=\"" +
             "show_dialog_for_new_parameter_value('" + node.data["param_id"] + "','" + node.data["param_label"] +
                   "','<%= parameter_values_experiment_path(@chart.experiment.experiment_id) %>', '<%= @chart.experiment.experiment_id %>')" +
             " \" /> ";
@@ -98,6 +95,8 @@ function init_<%= "#{@chart.experiment.experiment_id}_#{@chart.moe_name}" %>(exp
 
   rt_vis_tab["<%= "#{@chart.experiment.experiment_id}_#{@chart.moe_name}" %>"] = st_<%= "#{@chart.experiment.experiment_id}_#{@chart.moe_name}" %>;
 }
+
+$('div#rt_chart_' + i).html("<%= escape_javascript( render partial: 'regression_tree_chart', locals: { chart: @chart } ) %>")
 <% end %>
 
 $('#busy_rt').hide();

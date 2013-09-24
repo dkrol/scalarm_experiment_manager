@@ -457,7 +457,8 @@ class DataFarmingExperiment < MongoActiveRecord
 
     end
 
-    values
+    # TODO - probably hack critical!!!
+    values.uniq
   end
 
   private
