@@ -94,6 +94,7 @@ StdError = "scalarm_job.err";
 OutputSandbox = {"scalarm_job.out", "scalarm_job.err"};
 InputSandbox = {"scalarm_job_#{uuid}.sh", "scalarm_simulation_manager_#{uuid}.zip"};
 Requirements = (other.GlueCEUniqueID == "dwarf.wcss.wroc.pl:8443/cream-pbs-plgrid");
+VirtualOrganisation = "vo.plgrid.pl"; 
     eos
   end
 

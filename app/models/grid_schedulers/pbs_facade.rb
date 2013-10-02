@@ -60,8 +60,8 @@ class PBSFacade
   end
 
   def clean_after_job(ssh, job)
-    ssh.exec!("rm scalarm_simulation_manager_#{job.sm_uuid}.zip")
-    ssh.exec!("rm scalarm_job_#{job.sm_uuid}.sh")
+    # ssh.exec!("rm scalarm_simulation_manager_#{job.sm_uuid}.zip")
+    # ssh.exec!("rm scalarm_job_#{job.sm_uuid}.sh")
   end
 
   def restart(ssh, job)

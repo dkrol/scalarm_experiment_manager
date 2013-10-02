@@ -28,22 +28,20 @@
 .row
   %h4
     Input:
-  %br
   %ul
-  - @simulation['arguments'].split(',').each_with_index do |argument, index|
-    %li
-      %b
-        = @experiment.input_parameter_label_for(argument) + ':'
-      = @simulation['values'].split(',')[index]
+    - @simulation['arguments'].split(',').each_with_index do |argument, index|
+      %li
+        %b
+          = @experiment.input_parameter_label_for(argument) + ':'
+        = @simulation['values'].split(',')[index]
 
 - if @simulation['is_done']
   .row
     %h4
       Output:
-    %br
     %ul
-    - @simulation['result'].each do |moe_name, moe_value|
-      %li
-        %b
-          = moe_name + ':'
-        = moe_value
+      - @simulation['result'].each do |moe_name, moe_value|
+        %li
+          %b
+            = moe_name + ':'
+          = moe_value

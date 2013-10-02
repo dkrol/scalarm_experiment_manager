@@ -42,7 +42,8 @@ class PLGridFacade < InfrastructureFacade
             job_list.each do |job|
               scheduler = create_scheduler_facade(job.scheduler_type)
               ssh.exec!('voms-proxy-init --voms vo.plgrid.pl') if job.scheduler_type == 'glite' # generate new proxy if glite
-              experiment = DataFarmingExperiment.find_by_experiment_id(job.experiment_id)
+              experiment = DataFarmingExperiment.find_by_id(job.experiment_id)
+              Rails.logger.info("Experiment: #{job.experiment_id} --- nil?: #{experiment.nil?}")
 
               if experiment.nil? or not experiment.is_running
                 Rails.logger.info("Experiment '#{job.experiment_id}' is no longer running => destroy the job and temp password")
@@ -76,12 +77,12 @@ class PLGridFacade < InfrastructureFacade
   end
 
   def destroy_and_clean_after(job, scheduler, ssh)
-    Rails.logger.info("Destroying temp pass for #{job.sm_uuid}")
-    temp_pass = SimulationManagerTempPassword.find_by_sm_uuid(job.sm_uuid)
-    Rails.logger.info("It is nil ? --- #{temp_pass.nil?}")
-    temp_pass.destroy unless temp_pass.nil?
-    job.destroy
-    scheduler.clean_after_job(ssh, job)
+    # Rails.logger.info("Destroying temp pass for #{job.sm_uuid}")
+    # temp_pass = SimulationManagerTempPassword.find_by_sm_uuid(job.sm_uuid)
+    # Rails.logger.info("It is nil ? --- #{temp_pass.nil?}")
+    # temp_pass.destroy unless temp_pass.nil?
+    # job.destroy
+    # scheduler.clean_after_job(ssh, job)
   end
 
   def start_simulation_managers(user, instances_count, experiment_id, additional_params = {})

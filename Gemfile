@@ -51,8 +51,8 @@ group :doc do
 end
 
 # Use unicorn as the app server
-gem 'puma'
-#gem 'thin'
+# gem 'puma'
+gem 'thin'
 
 # Use Capistrano for deployment
 #group :development do

@@ -24,6 +24,12 @@
                 = label_tag t('.submission.instance_counter'), nil, class: 'inline right'
               .small-6.columns
                 = text_field_tag :job_counter
+            - images = AmazonAmi.all.map{|i| ["#{i.ami_id} --- #{i.login}", i.id]}
+            .row
+              .small-6.columns
+                = label_tag "Image:", nil, class: 'inline right'
+              .small-6.columns
+                = select_tag :image_id, options_for_select(images)
             .row
               .small-6.columns
                 = label_tag t('.submission.vm_type'), nil, class: 'inline right'

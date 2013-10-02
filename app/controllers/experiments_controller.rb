@@ -189,12 +189,16 @@ class ExperimentsController < ApplicationController
     }
 
     # TODO - mean execution time and predicted time to finish the experiment
-    #if sims_done > 0 and (rand() < (sims_done.to_f / @experiment.experiment_size) or sims_done == @experiment.experiment_size)
-    #  execution_time = @experiment.find_simulation_docs_by({is_done: true}, {fields: %w(sent_at done_at)}).reduce(0) do |acc, simulation|
-    #    acc += simulation['done_at'] - simulation['sent_at']
-    #  end
-    #  stats['avg_execution_time'] = (execution_time / sims_done).round(2)
-    #
+    if sims_done > 0 and (rand() < (sims_done.to_f / @experiment.experiment_size) or sims_done == @experiment.experiment_size)
+      execution_time = @experiment.find_simulation_docs_by({is_done: true}, {fields: %w(sent_at done_at)}).reduce(0) do |acc, simulation|
+        if simulation.include?('done_at') and simulation.include?('sent_at')
+          acc += simulation['done_at'] - simulation['sent_at']
+        else
+          acc
+        end
+     end
+     stats['avg_execution_time'] = (execution_time / sims_done).round(2)
+    
     #  predicted_finish_time = (Time.now - experiment.start_at).to_f / 3600
     #  predicted_finish_time /= (instances_done.to_f / experiment.experiment_size)
     #  predicted_finish_time_h = predicted_finish_time.floor
@@ -206,7 +210,7 @@ class ExperimentsController < ApplicationController
     #  predicted_finish_time +=  "#{predicted_finish_time_m} minutes" if predicted_finish_time_m > 0
     #
     #  partial_stats["predicted_finish_time"] = predicted_finish_time
-    #end
+    end
 
     render json: stats
   end
@@ -272,6 +276,8 @@ class ExperimentsController < ApplicationController
         @experiment.update_all_bars
       end
     end
+
+    File.delete(@experiment.file_with_ids_path) if File.exist?(@experiment.file_with_ids_path)
 
     flash[:notice] = "#{@num_of_new_simulations} simulations were created"
 

@@ -73,13 +73,14 @@ class AmazonFacade < InfrastructureFacade
     ec2 = get_ec2_for(user)
     return 'error', 'You have to provide Amazon secrets first!' if ec2.nil?
 
-    user_amis, experiment_ami = AmazonAmi.find_all_by_user_id(user.id), nil
-    user_amis.each do |ami|
-      if ami.experiment_id == experiment_id
-        experiment_ami = ami
-        break
-      end
-    end
+    # user_amis, experiment_ami = AmazonAmi.find_all_by_user_id(user.id), nil
+    # user_amis.each do |ami|
+    #   if ami.experiment_id == experiment_id
+    #     experiment_ami = ami
+    #     break
+    #   end
+    # end
+    experiment_ami = AmazonAmi.find_by_id(additional_params['image_id'])
 
     return 'error', 'You have to provide Amazon AMI information first!' if experiment_ami.nil?
 
@@ -212,13 +213,15 @@ class AmazonFacade < InfrastructureFacade
   def initialize_sm_on(vm_record, vm_instance)
     prepare_configuration_for_simulation_manager(vm_record.sm_uuid, vm_record.user_id, vm_record.experiment_id, vm_record.start_at)
 
-    user_amis, experiment_ami = AmazonAmi.find_all_by_user_id(vm_record.user_id), nil
-    user_amis.each do |ami|
-      if ami.experiment_id == vm_record.experiment_id
-        experiment_ami = ami
-        break
-      end
-    end
+    # user_amis, experiment_ami = AmazonAmi.find_all_by_user_id(vm_record.user_id), nil
+    # user_amis.each do |ami|
+    #   if ami.experiment_id == vm_record.experiment_id
+    #     experiment_ami = ami
+    #     break
+    #   end
+    # end
+
+    experiment_ami = AmazonAmi.find_by_ami_id(vm_instance.image_id.to_s)
 
     error_counter = 0
     while true

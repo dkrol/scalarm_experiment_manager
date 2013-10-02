@@ -4,6 +4,7 @@
 # secret_key - actually stored as hashed_secret_key
 
 class AmazonSecrets < MongoActiveRecord
+  Encryptor.default_options.merge!(:key => Digest::SHA256.hexdigest('QjqjFK}7|Xw8DDMUP-O$yp'))
 
   def self.collection_name
     'amazon_secrets'

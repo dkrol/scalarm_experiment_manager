@@ -6,6 +6,7 @@
 # password: actually stored as hash_password
 
 class AmazonAmi < MongoActiveRecord
+  Encryptor.default_options.merge!(:key => Digest::SHA256.hexdigest('QjqjFK}7|Xw8DDMUP-O$yp'))
 
   def self.collection_name
     'amazon_amis'
