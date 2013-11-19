@@ -1,13 +1,12 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.0.0'
+gem 'rails', '4.0.1'
+gem 'racc'
 
 # wrapper for R interpreter
 gem 'rinruby'
 
-# Use sqlite3 as the database for Active Record
-gem 'sqlite3'
 gem 'mongo'
 gem 'bson'
 gem 'bson_ext'
@@ -51,15 +50,11 @@ group :doc do
 end
 
 # Use unicorn as the app server
-# gem 'puma'
-gem 'thin'
-
-# Use Capistrano for deployment
-#group :development do
-#  gem 'capistrano', group: :development
-  #gem 'capistrano-thin', group: :development
-  #gem 'rvm-capistrano', group: :development
-#end
+gem 'puma'
+#gem 'thin'
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]
+# Rubinius specifics
+gem 'rubysl-matrix', '~> 2.1'
+gem 'rubysl', '~> 2.0'

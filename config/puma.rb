@@ -9,5 +9,3 @@ stdout_redirect 'log/puma.log', 'log/puma.log.err', true
 pidfile 'puma.pid'
 
 threads 1,16
-workers 4
-preload_app!
