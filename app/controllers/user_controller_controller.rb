@@ -1,6 +1,5 @@
 class UserControllerController < ApplicationController
   def login
-    Rails.logger.debug("Flash #{flash[:error]}")
     if request.post?
       begin
         session[:user] = ScalarmUser.authenticate_with_password(params[:username], params[:password]).id
@@ -11,8 +10,8 @@ class UserControllerController < ApplicationController
         redirect_to experiments_path
       rescue Exception => e
         Rails.logger.debug("Exception: #{e}")
+        reset_session
         flash[:error] = e.to_s
-        session[:user] = nil
 
         redirect_to login_path
       end
@@ -20,14 +19,12 @@ class UserControllerController < ApplicationController
   end
 
   def logout
-    flash[:notice] = t('logout_success')
-
     InfrastructureFacade.get_registered_infrastructures.each do |infrastructure_id, infrastructure_info|
       infrastructure_info[:facade].clean_tmp_credentials(@current_user.id, session)
     end
 
-    session[:user] = nil
-    session[:grid_credentials] = nil
+    reset_session
+    flash[:notice] = t('logout_success')
 
     redirect_to login_path
   end

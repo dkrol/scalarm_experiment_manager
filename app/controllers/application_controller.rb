@@ -9,11 +9,14 @@ class ApplicationController < ActionController::Base
 
   def authenticate
     @current_user = nil; @sm_user = false
+    
+    Rails.logger.debug("Session: #{session[:user]}")
 
-    # if the user is within a session
     if session[:user]
+      Rails.logger.debug('[authentication] using session data')
 
       @current_user = ScalarmUser.find_by_id(session[:user])
+      authentication_failed if @current_user.blank?
 
     else
       # if the user provides a valid certificate
@@ -25,8 +28,8 @@ class ApplicationController < ActionController::Base
           @current_user = ScalarmUser.find_by_id(session[:user])
           flash[:notice] = t('login_success')
         rescue Exception => e
+          reset_session
           flash[:error] = e.to_s
-          session[:user] = nil
 
           redirect_to :login
         end
@@ -51,15 +54,23 @@ class ApplicationController < ActionController::Base
         end
 
       else
-        Rails.logger.debug('[authentication] failed -> redirect')
-
-        session[:intended_action] = action_name
-        session[:intended_controller] = controller_name
-
-        redirect_to :login
+        authentication_failed
       end
 
     end
 
   end
+
+  def authentication_failed
+    reset_session
+    flash[:error] = 'You have to login first'
+
+    Rails.logger.debug('[authentication] failed -> redirect')
+
+    session[:intended_action] = action_name
+    session[:intended_controller] = controller_name
+
+    redirect_to :login
+  end
+
 end
